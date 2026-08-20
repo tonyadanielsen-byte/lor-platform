@@ -1,4 +1,5 @@
-import { createRound, saveResponse, addEmployeeInterview, completeRound, defaultTheme } from './store.js';
+import { createRound, saveResponse, addEmployeeInterview, completeRound } from './store.js';
+import { availableThemes } from './seed-data.js';
 
 const answerOptions = [
   ['OK', 'ok'],
@@ -7,17 +8,42 @@ const answerOptions = [
   ['Ikke relevant', 'na'],
 ];
 
-export function createRoundController({ user, onDone, notify }) {
+export function createRoundController({ user, onDone, notify, themeBank, initialPlan = null }) {
   let roundId = null;
-  let step = 0;
-  let department = 'Renhold';
-  let theme = defaultTheme;
+  let step = -1;
+  let department = initialPlan?.department || 'Renhold';
+  let selectedThemeId = null;
+  let theme = null;
   const responses = {};
   let employeeInterview = null;
 
+  function themes() {
+    return availableThemes(themeBank, department);
+  }
+
+  function resolveTheme(id = selectedThemeId) {
+    const choices = themes();
+    const preferredName = initialPlan?.themeName;
+    const found = choices.find(item => item.id === id) || choices.find(item => item.name === preferredName) || choices[0];
+    if (found) {
+      theme = found;
+      selectedThemeId = found.id;
+    }
+    return found;
+  }
+
+  resolveTheme();
+
   async function ensureRound() {
     if (roundId) return roundId;
-    roundId = await createRound({ leader: user, department, theme: theme.name, themeVersion: theme.version });
+    if (!theme) throw new Error('Ingen gyldig temamal er valgt.');
+    roundId = await createRound({
+      planId: initialPlan?.id || null,
+      leader: user,
+      department,
+      theme: theme.name,
+      themeVersion: theme.version || 1,
+    });
     return roundId;
   }
 
@@ -28,13 +54,18 @@ export function createRoundController({ user, onDone, notify }) {
     }, {});
   }
 
+  function themeOptions() {
+    return themes().map(item => `<option value="${item.id}" ${item.id === selectedThemeId ? 'selected' : ''}>${item.name}</option>`).join('');
+  }
+
   function intro() {
     return `
       <section class="round-shell card">
-        <div class="round-head"><div><span class="eyebrow">Ny lederoppfølgingsrunde</span><h1>Start LOR</h1><p>Start med positiv feedback, deretter går du gjennom kontrollpunktene.</p></div><span class="round-state">Klar</span></div>
+        <div class="round-head"><div><span class="eyebrow">Ny lederoppfølgingsrunde</span><h1>Start LOR</h1><p>Velg avdeling og tema. Spørsmålene hentes fra fabrikkens LOR-bank.</p></div><span class="round-state">Klar</span></div>
+        ${initialPlan ? `<div class="plan-banner"><strong>Planlagt runde · uke ${initialPlan.week}</strong><span>${initialPlan.themeName || 'Tema ikke satt'} · ${initialPlan.department || 'Avdeling må avklares'}</span></div>` : ''}
         <div class="form-grid">
-          <label>Avdeling<select id="roundDepartment"><option>Renhold</option><option>Ferdigmat</option><option>Rekvisita</option></select></label>
-          <label>Tema<select id="roundTheme"><option>Hygiene</option></select></label>
+          <label>Avdeling<select id="roundDepartment"><option ${department==='Renhold'?'selected':''}>Renhold</option><option ${department==='Ferdigmat'?'selected':''}>Ferdigmat</option><option ${department==='Rekvisita'?'selected':''}>Rekvisita</option></select></label>
+          <label>Tema<select id="roundTheme">${themeOptions()}</select></label>
         </div>
         <div class="positive-start"><strong>⭐ Start positivt</strong><p>Hva fungerer godt i området akkurat nå?</p><textarea id="positiveStart" placeholder="Registrer en konkret positiv observasjon…"></textarea></div>
         <button class="primary-action full-action" data-round-action="start">Start runden</button>
@@ -44,11 +75,12 @@ export function createRoundController({ user, onDone, notify }) {
   function question() {
     const q = theme.questions[step];
     const saved = responses[q.id] || {};
+    const freeText = q.responseType === 'freeText';
     return `
       <section class="round-shell card">
         <div class="round-progress"><span>Kontrollpunkt ${step + 1} av ${theme.questions.length}</span><div><i style="width:${((step + 1)/theme.questions.length)*100}%"></i></div></div>
         <div class="question-card"><span class="eyebrow">${theme.name} · ${department}</span><h2>${q.text}</h2>
-          <div class="answer-grid">${answerOptions.map(([label,value]) => `<button type="button" class="answer ${saved.status===value?'selected':''}" data-answer="${value}">${label}</button>`).join('')}</div>
+          ${freeText ? '<div class="question-note">Åpent observasjonsfelt – vurdering er valgfri.</div>' : `<div class="answer-grid">${answerOptions.map(([label,value]) => `<button type="button" class="answer ${saved.status===value?'selected':''}" data-answer="${value}">${label}</button>`).join('')}</div>`}
           <label class="stack">Kommentar<textarea id="questionComment" placeholder="Hva observerte du?">${saved.comment || ''}</textarea></label>
           <label class="stack">Positiv observasjon <input id="questionPositive" value="${saved.positive || ''}" placeholder="Valgfritt – hva gjorde medarbeider/område bra?" /></label>
         </div>
@@ -84,9 +116,26 @@ export function createRoundController({ user, onDone, notify }) {
 
   function render() {
     if (step === -1) return intro();
+    if (!theme) return '<section class="round-shell card"><div class="empty-state">Ingen temamal er tilgjengelig.</div></section>';
     if (step < theme.questions.length) return question();
     if (step === theme.questions.length) return interview();
     return summary();
+  }
+
+  function handleChange(target) {
+    if (step !== -1) return false;
+    if (target.id === 'roundDepartment') {
+      department = target.value;
+      selectedThemeId = null;
+      resolveTheme();
+      return true;
+    }
+    if (target.id === 'roundTheme') {
+      selectedThemeId = target.value;
+      resolveTheme(selectedThemeId);
+      return true;
+    }
+    return false;
   }
 
   async function handle(target, root) {
@@ -100,6 +149,8 @@ export function createRoundController({ user, onDone, notify }) {
 
     if (action === 'start') {
       department = root.querySelector('#roundDepartment').value;
+      selectedThemeId = root.querySelector('#roundTheme').value;
+      resolveTheme(selectedThemeId);
       await ensureRound();
       const positive = root.querySelector('#positiveStart').value.trim();
       if (positive) responses.__positiveStart = { status: 'positive', positive };
@@ -107,8 +158,8 @@ export function createRoundController({ user, onDone, notify }) {
     } else if (action === 'next') {
       const q = theme.questions[step];
       const selected = root.querySelector('[data-answer].selected');
-      if (!selected) { notify('Velg status før du går videre.', true); return { rerender:false }; }
-      const response = { status: selected.dataset.answer, comment: root.querySelector('#questionComment').value.trim(), positive: root.querySelector('#questionPositive').value.trim() };
+      if (q.responseType !== 'freeText' && !selected) { notify('Velg status før du går videre.', true); return { rerender:false }; }
+      const response = { status: selected?.dataset.answer || 'note', comment: root.querySelector('#questionComment').value.trim(), positive: root.querySelector('#questionPositive').value.trim() };
       responses[q.id] = response;
       await saveResponse(await ensureRound(), q.id, response);
       step += 1;
@@ -139,6 +190,5 @@ export function createRoundController({ user, onDone, notify }) {
     return { rerender: true };
   }
 
-  step = -1;
-  return { render, handle };
+  return { render, handle, handleChange };
 }

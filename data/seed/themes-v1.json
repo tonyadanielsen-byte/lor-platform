@@ -1,0 +1,173 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "workbooks": ["Intern LOR August - 2026(1).xlsx", "Intern LOR August - Desember 2025.xlsx"],
+    "note": "Spørsmålsbanken er identisk i 2025- og 2026-filene. Dedikerte temafaner er kanonisk V1 for felles temaer; avdelingsfaner bevares som utvidede/avdelingsspesifikke temaer og overstyringer."
+  },
+  "responseScale": ["OK", "Forbedringspunkt", "Avvik", "Ikke relevant"],
+  "positiveFeedbackRequiredAtStart": true,
+  "sharedThemes": [
+    {
+      "id": "hms-opplaering",
+      "name": "HMS-opplæring",
+      "version": 1,
+      "purpose": "Undersøke hvordan HMS-opplæring er gjennomført og forstått blant medarbeiderne i praksis.",
+      "questions": [
+        "Har du fått god og forståelig opplæring i hvordan du skal utføre jobben din på en trygg måte?",
+        "Vet du hvor du skal gå eller hva du skal gjøre ved en evakuering (rømningsveier)?",
+        "Er du kjent med hvor nærmeste førstehjelpsutstyr eller sanitetsalarm befinner seg?",
+        "Er det noe i HMS-opplæringen du mener bør forbedres eller følges opp nærmere?",
+        "Eventuelle andre observasjoner eller innspill fra samtalen:"
+      ]
+    },
+    {
+      "id": "husorden",
+      "name": "Husorden",
+      "version": 1,
+      "purpose": "Undersøke hvordan avdelingen jobber med orden, ryddighet og etterlevelse av rutiner for sikker og hygienisk drift.",
+      "questions": [
+        "Hvordan oppleves orden og struktur i sluseområdet (f.eks. skotøy, bekledning, flyt)?",
+        "Hvilke rutiner har dere for rengjøring og orden i dataskapet?",
+        "Hvordan vurderer du orden og ryddighet rundt maskiner og utstyr i produksjonsområdet?",
+        "Blir det brukt detekterbare penner i henhold til rutiner?",
+        "Er kjemikalier merket riktig og oppbevart i henhold til gjeldende rutiner og krav?",
+        "Eventuelle andre observasjoner eller temaer fra samtalen:"
+      ]
+    },
+    {
+      "id": "rutinebeskrivelser",
+      "name": "Rutinebeskrivelser",
+      "version": 1,
+      "purpose": "Kartlegge hvordan rutinebeskrivelser blir forstått, brukt og gjort tilgjengelige for medarbeiderne i det daglige arbeidet.",
+      "questions": [
+        "Hvilke rutinebeskrivelser gjelder for ditt område – og vet du hvor du finner dem?",
+        "Hva gjør du dersom du oppdager noe som avviker fra rutinene?",
+        "Opplever du at rutiner og instrukser er lett tilgjengelige og enkle å forstå i hverdagen?",
+        "Eventuelle andre observasjoner eller temaer fra samtalen:"
+      ]
+    },
+    {
+      "id": "kontrollrutiner",
+      "name": "Kontrollrutiner",
+      "version": 1,
+      "purpose": "Undersøke hvordan kontrollrutiner praktiseres i det daglige, og om nødvendige tiltak følges opp systematisk.",
+      "questions": [
+        "Blir kontrollskjemaer fylt ut og signert slik det er avtalt?",
+        "Er du kjent med rutinene for håndtering av hardplast og glass i området ditt?",
+        "Hva gjør dere hvis dere oppdager kondens i produksjonsmiljøet?",
+        "Hvilke kontroller gjennomføres regelmessig i ditt område – og hvordan dokumenteres de?",
+        "Eventuelle andre observasjoner eller innspill fra samtalen:"
+      ]
+    },
+    {
+      "id": "hygiene",
+      "name": "Hygiene",
+      "version": 1,
+      "purpose": "Vurdere hvordan hygienerutiner etterleves i praksis, og hvordan medarbeidere forstår og følger de etablerte retningslinjene.",
+      "questions": [
+        "Blir riktig bekledning benyttet i henhold til hygienekrav (f.eks. ren kjeledress, skotøy, hårnett)?",
+        "Brukes lue og skjeggbind der det er påkrevd – og på korrekt måte?",
+        "Hvordan gjennomføres håndhygiene og hanskebytte i deres område – og hvordan sikres god praksis?",
+        "Dersom det er mulig: Observer håndvask og vurdér om den gjennomføres i tråd med opplæring og rutiner.",
+        "Eventuelle andre observasjoner eller innspill fra samtalen:"
+      ]
+    },
+    {
+      "id": "hms-verneutstyr",
+      "name": "HMS-verneutstyr",
+      "version": 1,
+      "purpose": "Kartlegge om rutiner for bruk og tilgjengelighet av påbudt verneutstyr følges og er godt kjent blant medarbeidere.",
+      "questions": [
+        "Blir påbudt verneutstyr brukt korrekt av medarbeidere (f.eks. sko, hjelm, briller, hansker)?",
+        "Vet medarbeidere hva slags verneutstyr som er påbudt i deres område – og hvorfor det er viktig?",
+        "Er førstehjelpsutstyr (f.eks. førstehjelpsskrin) synlig, tilgjengelig og kjent blant de ansatte?",
+        "Eventuelle andre observasjoner eller innspill fra samtalen:"
+      ],
+      "departmentOverrides": {
+        "Renhold": ["Hvilke rutiner har du for å kontrollere at utstyr til arbeid i høyden er tilstrekkelig?"]
+      }
+    },
+    {
+      "id": "kvalitet-hms-kultur",
+      "name": "Kvalitet og HMS-kultur",
+      "version": 1,
+      "purpose": "Undersøke hvordan avdelingen jobber med å synliggjøre og følge opp kvalitets- og HMS-arbeidet i det daglige.",
+      "questions": [
+        "Hvordan blir hygieneopplæring fulgt opp for nye og eksisterende medarbeidere?",
+        "Er mål og prioriteringer for HMS og kvalitet synlige og kjent blant medarbeiderne?",
+        "Er månedens HMS-/kvalitetstema gjort kjent for alle (f.eks. via tavle, tavlemøter eller lignende)?",
+        "Hvordan får medarbeidere mulighet til å gi innspill eller dele bekymringer om HMS/kvalitet?",
+        "Eventuelle andre observasjoner eller temaer fra samtalen:"
+      ]
+    }
+  ],
+  "departmentThemes": [
+    {
+      "id": "brann-romningsvei",
+      "name": "HMS – Brann og rømningsvei",
+      "departments": ["Ferdigmat", "Renhold", "Rekvisita"],
+      "purpose": "Kjennskapen til brann og rømningsveier skal kontrolleres.",
+      "questions": ["Har du kjennskap til hvor brannslukningsutstyr er?", "Sjekk at rømningsveier ikke er blokkert", "Hva gjør du ved oppdagelse av brann?", "Har du kjennskap til hvor brannalarmen er?", "Annet:"]
+    },
+    {
+      "id": "hms-truck",
+      "name": "HMS-Truck",
+      "departments": ["Ferdigmat", "Renhold", "Rekvisita"],
+      "purpose": "Det skal kontrolleres om rutiner for truck følges.",
+      "questions": ["Er daglig kontroll utført?", "Er omgivelser rundt ladestasjon sjekket?", "Observer hvordan truckjøring foregår", "Har du godkjent kompetansebevis og opplæring av trucken?", "Annet:"]
+    },
+    {
+      "id": "trivsel",
+      "name": "HMS – Trivsel",
+      "departments": ["Ferdigmat", "Renhold", "Rekvisita"],
+      "purpose": "Snakke om arbeidsmiljø og trivsel.",
+      "questions": ["Hvordan opplever du arbeidsmiljøet i din avdeling?", "Hvordan er du med på å påvirke din arbeidshverdag?", "Hva bidrar du med for at andre skal trives på jobb?", "Annet:"]
+    },
+    {
+      "id": "tavlemote",
+      "name": "Tavlemøte",
+      "departments": ["Ferdigmat", "Renhold", "Rekvisita"],
+      "variants": {
+        "Ferdigmat": ["Kom deltakerne tidsnok til møtet? Ble møtet startet til riktig tid?", "Ble møtet gjennomført til avtalt tid?", "Ble status fra forrige møte gjennomgått?", "Ble alle relevante KPI-er diskutert i møtet?", "Ble det opprettet aktiviteter/aksjoner ved avvikende KPI?", "Ble aksjoner definert med ansvarlig for gjennomføring og tidsfrist?", "Ble det definert nye aksjoner dersom man ikke var i mål fra forrige skift/dag?", "Ble aksjonene dedikert til riktig person?", "Deltok møtedeltakerne aktivt i aktuelle diskusjoner?", "Ble det en oppsummering i slutten av møtet?", "Var aksjoner/status oppdatert fra forrige møte?", "Andre kommentarer:"],
+        "Renhold": ["Kom deltakerne tidsnok til møtet? Ble møtet startet til riktig tid?", "Ble møtet gjennomført til avtalt tid?", "Ble status fra forrige møte gjennomgått?", "Ble alle relevante KPI-er diskutert i møtet?", "Ble det opprettet aktiviteter/aksjoner ved avvikende KPI?", "Ble aksjoner definert med ansvarlig for gjennomføring og tidsfrist?", "Ble det definert nye aksjoner dersom man ikke var i mål fra forrige skift/dag?", "Ble aksjonene dedikert til riktig person?", "Deltok møtedeltakerne aktivt i aktuelle diskusjoner?", "Ble det en oppsummering i slutten av møtet?", "Var aksjoner/status oppdatert fra forrige møte?", "Andre kommentarer:"],
+        "Rekvisita": ["Er minimumskravene synlige? Er de oppdaterte?", "Blir minimumskravene nevnt/tatt opp?", "Hvordan oppleves tavlemøtet?", "Hvordan oppleves møteholder?", "Blir operatørene inkludert?", "Engasjerer operatørene seg?", "Annet:"]
+      }
+    },
+    {
+      "id": "hygiene-tekniske-inngrep",
+      "name": "Hygiene etter tekniske inngrep",
+      "departments": ["Ferdigmat", "Renhold"],
+      "questions": ["Hvilke rutiner har dere for hygiene etter tekniske inngrep?", "Bruker dere skjema for hygiene etter tekniske inngrep?", "Annet:"]
+    },
+    {
+      "id": "avfall",
+      "name": "Avfall",
+      "departments": ["Ferdigmat", "Renhold"],
+      "questions": ["Kjenner du til bruken av røde bakker?", "Hvordan håndterer du avfall i ditt område?", "Sjekk og observer at røde bakker benyttes", "Annet:"]
+    },
+    {
+      "id": "sporing-merking",
+      "name": "Sporing og merking",
+      "departments": ["Ferdigmat"],
+      "questions": ["Sjekk at lastbærer er merket", "Hva er dine rutiner for merking i ditt område?", "Hva gjør du når produkter er feilmerket/ikke merket?", "Annet:"]
+    },
+    {
+      "id": "fremmedlegemer",
+      "name": "Fremmedlegemer",
+      "departments": ["Ferdigmat"],
+      "questions": ["Observer om det står mye åpent produkt rundt i avdeling", "Hva gjør du om du oppdager fremmedlegemer?", "Sjekk at transportbånd/fjøler er hele", "Annet:"]
+    },
+    {
+      "id": "temperaturkontroll",
+      "name": "Temperaturkontroll",
+      "departments": ["Ferdigmat"],
+      "questions": ["Spør en operatør om å utføre temperaturkontroll (sprit termometer?)", "Hva blir gjort ved temperaturavvik? (Avviksbehandling)", "Kontroller avdelingens CCP-skjema", "Spør om operatør har gjennomført CCP-opplæring", "Annet:"]
+    },
+    {
+      "id": "merkekontroll",
+      "name": "Merkekontroll",
+      "departments": ["Ferdigmat"],
+      "questions": ["Hvordan utføres merkekontroll?", "Hva kontrolleres ved kontrollen?", "Har du fått tilstrekkelig opplæring i utføring av merkekontroll?", "Sjekk at kontrollen er signert av nærmeste leder", "Annet:"]
+    }
+  ]
+}
