@@ -1,0 +1,22 @@
+{
+  "rules": {
+    "lor": {
+      ".read": "auth != null",
+      ".write": "auth != null",
+      "rounds": {
+        "$roundId": {
+          ".validate": "newData.hasChildren(['leaderUid','leaderName','department','theme','status'])"
+        }
+      },
+      "comments": {
+        "$objectType": {
+          "$objectId": {
+            "$commentId": {
+              ".validate": "newData.hasChildren(['text','authorUid','authorName','createdAt'])"
+            }
+          }
+        }
+      }
+    }
+  }
+}
