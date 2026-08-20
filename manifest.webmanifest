@@ -1,0 +1,12 @@
+{
+  "name": "LOR – Lederoppfølgingsrunder",
+  "short_name": "LOR",
+  "description": "Digital lederoppfølging for Nortura Sarpsborg.",
+  "lang": "nb-NO",
+  "start_url": "/lor-platform/",
+  "scope": "/lor-platform/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#F4F6FB",
+  "theme_color": "#0B1730"
+}
