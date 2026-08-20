@@ -6,11 +6,45 @@ LOR Platform skal gjøre Lederoppfølgingsrunder til et kontinuerlig leder- og f
 
 En gjennomført LOR skal produsere strukturert kunnskap om positive observasjoner, forbedringspunkter, avvik, medarbeiderinnspill og nødvendig oppfølging. Dataene skal kunne analyseres over tid på leder, avdeling, tema og kontrollpunkt.
 
-## 2. Primære brukere
+## 2. Produktidentitet
+
+LOR Platform og OpEx-master er **to separate apper** med ulike behov, ulike arbeidsflyter og egen produktidentitet.
+
+De kan dele:
+
+- tekniske mønstre og erfaringer
+- Firebase Authentication der det er hensiktsmessig
+- overordnede kvalitetsprinsipper
+- enkelte designprinsipper og komponentmønstre
+- læring fra mobil/PWA, varsling, kommentarer, historikk og eksport
+
+De skal ikke behandles som moduler i samme produkt eller utvikles slik at LOR blir en kopi av OpEx. LOR skal optimaliseres for lederoppfølgingsrunder, observasjon, medarbeiderdialog, læring og utvikling.
+
+LOR skal ha sin egen visuelle identitet innenfor en profesjonell Nortura-kontekst.
+
+## 3. Presentasjonskrav
+
+LOR skal kunne presenteres for Nortura Sarpsborgs ledergruppe og må derfor oppleves som et troverdig, gjennomarbeidet og presentasjonsklart produkt.
+
+Dette innebærer:
+
+- tydelig og moderne visuell identitet
+- høy informasjonskvalitet uten unødvendig kompleksitet
+- dashboard som kommuniserer verdi på få sekunder
+- naturlig og rask mobilflyt ute i fabrikken
+- profesjonell PC-opplevelse for analyse og ledelsesoppfølging
+- konsekvent språk, spacing, typografi og komponentbruk
+- relevante tomtilstander, hjelpetekster og mikrointeraksjoner
+- ingen synlige prototype-elementer, tekniske plassholdere eller uferdige visninger i demonstrasjonsmodus
+- demonstrasjonsdata må fortelle en troverdig historie om hvordan LOR skaper verdi
+
+Design skal kontinuerlig forbedres og optimaliseres gjennom utviklingen, ikke behandles som et avsluttende pyntelag.
+
+## 4. Primære brukere
 
 V1 tar utgangspunkt i samme godkjente brukergruppe som OpEx-master. Rolle- og tilgangsmodell detaljeres før implementering.
 
-## 3. Kjerneobjekt: LOR-runden
+## 5. Kjerneobjekt: LOR-runden
 
 Hver LOR-runde skal minimum kunne knyttes til:
 
@@ -29,7 +63,7 @@ Hver LOR-runde skal minimum kunne knyttes til:
 - kommentarer med bruker og timestamp
 - status
 
-## 4. Foreløpige statuser
+## 6. Foreløpige statuser
 
 - Ikke fordelt
 - Planlagt
@@ -40,7 +74,7 @@ Hver LOR-runde skal minimum kunne knyttes til:
 
 `Forsinket` behandles som en systemberegnet status/indikator slik at historikken ikke avhenger av manuell registrering.
 
-## 5. Svar på kontrollpunkt
+## 7. Svar på kontrollpunkt
 
 - OK
 - Forbedringspunkt
@@ -49,7 +83,7 @@ Hver LOR-runde skal minimum kunne knyttes til:
 
 Positive observasjoner skal kunne registreres eksplisitt og være synlige i oppsummering og historikk.
 
-## 6. V1 arbeidsflyt
+## 8. V1 arbeidsflyt
 
 ### Planlegging
 LOR tildeles leder, avdeling, tema og tidsperiode.
@@ -69,7 +103,7 @@ Observasjoner som krever handling kan opprette oppfølging/tiltak med ansvarlig,
 ### Lukking
 Runden kan lukkes når nødvendige oppfølginger er ferdigbehandlet etter definerte regler.
 
-## 7. Dashboard
+## 9. Dashboard
 
 Dashboard skal som minimum vise hittil i år:
 
@@ -88,7 +122,9 @@ Dashboard skal som minimum vise hittil i år:
 
 Dashboard skal støtte drill-down til underliggende runder/data.
 
-## 8. Lederstatus
+Dashboardet skal også fungere som den primære ledelsesvisningen i presentasjoner. Det skal raskt kunne forklare status, utvikling, risiko og anbefalt fokus uten at brukeren må navigere gjennom flere sider.
+
+## 10. Lederstatus
 
 Lederstatus skal ikke premiere lavt antall funn eller høy OK-andel isolert. Modellen skal primært vurdere:
 
@@ -101,7 +137,7 @@ Lederstatus skal ikke premiere lavt antall funn eller høy OK-andel isolert. Mod
 
 Eksakt beregningsmodell låses senere.
 
-## 9. Temabank
+## 11. Temabank
 
 Temaer og spørsmål skal være administrerbare data, ikke hardkodet innhold.
 
@@ -118,7 +154,7 @@ Et tema skal kunne ha:
 
 Endring av tema/spørsmål skal aldri omskrive historiske LOR-runder.
 
-## 10. Innsikt og utvikling
+## 12. Innsikt og utvikling
 
 Systemet skal kunne identifisere blant annet:
 
@@ -131,7 +167,7 @@ Systemet skal kunne identifisere blant annet:
 
 Systemet kan foreslå endret fokus eller frekvens. Kritiske HMS-/kvalitetstemaer skal ikke fjernes automatisk.
 
-## 11. Varslinger
+## 13. Varslinger
 
 Varslingssystem er V1-krav, men detaljert varslingsmatrise er bevisst ikke låst ennå. Den utformes separat.
 
@@ -145,7 +181,7 @@ Kategorier som må støttes teknisk:
 - endringer
 - relevante systeminnsikter
 
-## 12. Dokumentasjon
+## 14. Dokumentasjon
 
 Vedlegg skal kunne knyttes til riktig kontekst, eksempelvis:
 
@@ -156,11 +192,26 @@ Vedlegg skal kunne knyttes til riktig kontekst, eksempelvis:
 
 Metadata skal inkludere opplaster og timestamp.
 
-## 13. OpEx-integrasjon
+## 15. Forholdet til OpEx-master
 
-Arkitekturen skal forberedes for at et LOR-funn senere kan opprette eller kobles til et tiltak i OpEx-master uten dobbeltregistrering.
+OpEx-master er referanse for læring og mønstre, men ikke produktstruktur.
 
-## 14. Ikke låst ennå
+Eventuell fremtidig integrasjon skal være eksplisitt og løs koblet. Et LOR-funn kan senere kunne opprette eller kobles til et tiltak i OpEx-master uten dobbeltregistrering, men appene skal fortsatt fungere selvstendig.
+
+## 16. Produktfilosofi
+
+LOR skal kontinuerlig forbedres og optimaliseres. Nye funksjoner skal vurderes etter om de:
+
+1. gjør rundene enklere å gjennomføre
+2. forbedrer kvaliteten på observasjoner og medarbeiderdialog
+3. styrker oppfølging og læring
+4. gir ledelsen bedre beslutningsgrunnlag
+5. reduserer administrasjon eller dobbeltarbeid
+6. gjør produktet mer intuitivt og attraktivt å bruke
+
+Funksjoner som bare tilfører visuell eller prosessmessig kompleksitet uten tydelig bruker- eller ledelsesverdi skal normalt ikke prioriteres.
+
+## 17. Ikke låst ennå
 
 Følgende bestemmes senere uten å blokkere foundation:
 
@@ -168,4 +219,4 @@ Følgende bestemmes senere uten å blokkere foundation:
 - eksakt leder-score
 - endelig rolle-/tilgangsmatrise
 - endelig AI/innsiktsnivå
-- endelig teknisk integrasjon mellom LOR og OpEx-master
+- eventuell teknisk integrasjon mellom LOR og OpEx-master
