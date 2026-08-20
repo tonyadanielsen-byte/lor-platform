@@ -98,7 +98,7 @@ Leder kan registrere en eller flere medarbeiderdialoger. Medarbeider kan registr
 Før innsending vises positive observasjoner, forbedringspunkter, avvik, medarbeiderinnspill og foreslåtte oppfølginger.
 
 ### Oppfølging
-Observasjoner som krever handling kan opprette oppfølging/tiltak med ansvarlig, frist og status.
+Observasjoner eller medarbeiderinnspill som krever handling kan opprette et tiltak direkte i OpEx-master via den låste integrasjonen beskrevet i kapittel 15.
 
 ### Lukking
 Runden kan lukkes når nødvendige oppfølginger er ferdigbehandlet etter definerte regler.
@@ -119,6 +119,8 @@ Dashboard skal som minimum vise hittil i år:
 - utvikling gjennom året
 - temaer med størst oppfølgingsbehov
 - lederstatus
+- antall LOR-funn sendt til OpEx-master
+- status på tiltak som er opprettet fra LOR
 
 Dashboard skal støtte drill-down til underliggende runder/data.
 
@@ -164,6 +166,8 @@ Systemet skal kunne identifisere blant annet:
 - kontrollpunkter med hyppige avvik
 - avdelingsforskjeller
 - oppfølginger som ofte blir forsinket
+- hvilke LOR-funn som oftest blir til tiltak i OpEx-master
+- gjennomløpstid fra LOR-funn til ferdigstilt tiltak
 
 Systemet kan foreslå endret fokus eller frekvens. Kritiske HMS-/kvalitetstemaer skal ikke fjernes automatisk.
 
@@ -180,6 +184,7 @@ Kategorier som må støttes teknisk:
 - kommentarer
 - endringer
 - relevante systeminnsikter
+- statusendring på koblet OpEx-tiltak
 
 ## 14. Dokumentasjon
 
@@ -188,15 +193,95 @@ Vedlegg skal kunne knyttes til riktig kontekst, eksempelvis:
 - LOR-runde
 - kontrollpunkt
 - observasjon
+- medarbeiderinnspill
 - oppfølging
 
 Metadata skal inkludere opplaster og timestamp.
 
-## 15. Forholdet til OpEx-master
+## 15. Låst integrasjon mot OpEx-master
 
-OpEx-master er referanse for læring og mønstre, men ikke produktstruktur.
+LOR og OpEx-master skal være to separate apper, men de skal kunne utveksle tiltak på en kontrollert måte.
 
-Eventuell fremtidig integrasjon skal være eksplisitt og løs koblet. Et LOR-funn kan senere kunne opprette eller kobles til et tiltak i OpEx-master uten dobbeltregistrering, men appene skal fortsatt fungere selvstendig.
+Det låste produktprinsippet er:
+
+**LOR oppdager og dokumenterer → OpEx-master eier tiltaket og gjennomføringen → status/resultat føres tilbake til LOR.**
+
+### 15.1 Opprett tiltak fra LOR
+
+Fra et forbedringspunkt, avvik eller medarbeiderinnspill skal brukeren kunne velge **«Opprett tiltak i Master»**.
+
+Skjemaet skal visuelt og funksjonelt ligge tett på dagens **«Nytt tiltak»** i OpEx-master, slik at arbeidsflyten oppleves kjent.
+
+Følgende skal så langt mulig forhåndsutfylles fra LOR-konteksten:
+
+- Kategori = `LOR` (automatisk og låst)
+- Avdeling/område
+- kilde/referanse til aktuell LOR-runde
+- beskrivelse eller foreslått tekst basert på observasjon/medarbeiderinnspill
+- opprettet av / innlogget leder
+
+Bruker skal fortsatt kunne sette eller justere relevante tiltaksegenskaper som:
+
+- tittel
+- ansvarlig/eier
+- frist
+- prioritet
+- beskrivelse
+- neste steg
+
+### 15.2 Ingen dobbeltregistrering
+
+Når tiltaket opprettes, skal det lagres som et ordinært tiltak i OpEx-master og ikke som en separat lokal kopi i LOR.
+
+LOR skal i stedet lagre koblingsmetadata, eksempelvis:
+
+- `sourceType = LOR`
+- `lorRoundId`
+- `lorObservationId` eller `lorInterviewInputId`
+- `opexTaskId`
+
+OpEx-tiltaket skal tilsvarende lagre kildeinformasjon som gjør det mulig å finne tilbake til LOR-runden.
+
+### 15.3 Status tilbake til LOR
+
+LOR skal kunne vise status på koblet tiltak fra OpEx-master.
+
+Eksempelvis:
+
+- Opprettet
+- Aktivt
+- Forfalt
+- Fullført
+- Stanset
+- Avsluttet
+
+Når tiltaket fullføres i OpEx-master, skal LOR kunne vise hvem som fullførte det og dato/tidspunkt der dette er tilgjengelig.
+
+### 15.4 Visning i LOR
+
+Et funn som ikke har tiltak kan vise handlingen **«Opprett tiltak i Master»**.
+
+Et funn som allerede er koblet til et tiltak skal i stedet vise:
+
+- OpEx-/Master-ID
+- ansvarlig
+- frist
+- gjeldende status
+- lenke/handling for å åpne tiltaket
+
+### 15.5 Teknisk integrasjonsprinsipp
+
+LOR-klienten skal ikke skrive vilkårlig direkte inn i OpEx-datastrukturen.
+
+Integrasjonen skal gå via et kontrollert integrasjonslag, fortrinnsvis Firebase Cloud Function/API, som:
+
+1. verifiserer innlogget bruker
+2. validerer data
+3. oppretter tiltaket i OpEx-master
+4. lagrer kilde-/koblingsmetadata
+5. returnerer opprettet tiltaks-ID til LOR
+
+Dette gir løs kobling mellom appene og reduserer risiko for at endringer i den ene appen ødelegger den andre.
 
 ## 16. Produktfilosofi
 
@@ -219,4 +304,4 @@ Følgende bestemmes senere uten å blokkere foundation:
 - eksakt leder-score
 - endelig rolle-/tilgangsmatrise
 - endelig AI/innsiktsnivå
-- eventuell teknisk integrasjon mellom LOR og OpEx-master
+- eksakt teknisk API-/Cloud Function-kontrakt mellom LOR og OpEx-master
