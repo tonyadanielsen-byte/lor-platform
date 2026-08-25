@@ -9,7 +9,41 @@ export async function saveResponse(id,qid,response){return db.ref().update({[`lo
 export async function addEmployeeInterview(id,data){return db.ref(`lor/rounds/${id}/employeeInterviews`).push().set({...data,createdAt:serverTimestamp(),updatedAt:serverTimestamp()})}
 export async function completeRound(id,summary){return db.ref(`lor/rounds/${id}`).update({status:summary.needsFollowUp?'Oppfølging pågår':'Gjennomført',summary,completedAt:serverTimestamp(),updatedAt:serverTimestamp()})}
 export async function updateRound(id,patch,user){return db.ref(`lor/rounds/${id}`).update({...patch,updatedAt:serverTimestamp(),lastEditedBy:user?.name||'',lastEditedByUid:user?.uid||''})}
-export async function saveTheme(theme){const id=theme.id||db.ref('lor/themes').push().key;await db.ref(`lor/themes/${id}`).set({...theme,id:undefined,active:theme.active!==false,updatedAt:serverTimestamp()});return id}
+export async function saveTheme(theme){const id=theme.id||db.ref('lor/themes').push().key;const clean={...theme};delete clean.id;await db.ref(`lor/themes/${id}`).set({...clean,active:theme.active!==false,updatedAt:serverTimestamp()});return id}
 export async function deleteTheme(id){return db.ref(`lor/themes/${id}`).update({active:false,updatedAt:serverTimestamp()})}
-export async function createMasterAction({round,finding,user,title,description,owner='',dueDate=''}){const ref=db.ref('tiltak').push();const payload={title,description,owner,dueDate,status:'Ikke startet',category:'LOR',source:'LOR',sourceRoundId:round.id,sourceTheme:round.theme,sourceDepartment:round.department,sourceFinding:finding||'',createdBy:user.name,createdByUid:user.uid,createdAt:serverTimestamp(),updatedAt:serverTimestamp()};await ref.set(payload);await db.ref(`lor/rounds/${round.id}/actions/${ref.key}`).set({masterTaskId:ref.key,title,status:'Opprettet',createdAt:serverTimestamp()});return ref.key}
+function isoDate(d=new Date()){return d.toISOString().slice(0,10)}
+function defaultDueDate(){const d=new Date();d.setDate(d.getDate()+14);return isoDate(d)}
+export async function createMasterAction({round,finding,user,title,description,owner='',dueDate='',priority='Middels'}){
+  const ref=db.ref('tiltak').push();
+  const payload={
+    tittel:String(title||finding||'LOR-tiltak').trim(),
+    beskrivelse:String(description||`Opprettet fra LOR: ${round.theme} – ${round.department}`).trim(),
+    nestesteg:'Følg opp funnet fra LOR og dokumenter effekt/lukking.',
+    eier:owner||user.name,
+    kategori:'LOR',
+    omrade:round.department||'Annet',
+    prioritet:priority||'Middels',
+    status:'Innmeldt',
+    frist:dueDate||defaultDueDate(),
+    miljo:'Produksjon',
+    dato:isoDate(),
+    livssyklus:'Aktiv',
+    arkivert:false,
+    papirkurv:false,
+    forslagsstiller:user.name,
+    opprettetAv:user.name,
+    source:'LOR',
+    sourceRoundId:round.id,
+    sourceTheme:round.theme,
+    sourceDepartment:round.department,
+    sourceFinding:finding||'',
+    sourceLeader:round.leaderName||'',
+    createdByUid:user.uid,
+    createdAt:serverTimestamp(),
+    updatedAt:serverTimestamp()
+  };
+  await ref.set(payload);
+  await db.ref(`lor/rounds/${round.id}/actions/${ref.key}`).set({masterTaskId:ref.key,title:payload.tittel,status:'Opprettet',createdAt:serverTimestamp()});
+  return ref.key;
+}
 export async function addComment(type,id,user,text){return db.ref(`lor/comments/${type}/${id}`).push().set({text:String(text||'').trim(),authorUid:user.uid,authorName:user.name,createdAt:serverTimestamp()})}

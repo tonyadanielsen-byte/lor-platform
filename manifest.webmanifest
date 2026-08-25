@@ -1,4 +1,5 @@
 {
+  "id": "/lor-platform/",
   "name": "OpEx LOR – Lederoppfølgingsrunder",
   "short_name": "LOR",
   "description": "Digital lederoppfølging for Nortura Sarpsborg.",
@@ -10,6 +11,7 @@
   "background_color": "#F4F7FB",
   "theme_color": "#1F7A55",
   "icons": [
-    {"src":"./lor-icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}
+    {"src":"./lor-icon.svg?v=3.2","sizes":"any","type":"image/svg+xml","purpose":"any"},
+    {"src":"./lor-icon.svg?v=3.2","sizes":"any","type":"image/svg+xml","purpose":"maskable"}
   ]
 }
