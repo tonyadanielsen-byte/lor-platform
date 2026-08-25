@@ -1,79 +1,15 @@
 import { db, serverTimestamp } from './firebase.js';
 
-export function subscribePlannedRounds(uid, callback) {
-  const ref = db.ref('lor/plans');
-  const handler = snap => {
-    const rows = [];
-    snap.forEach(child => {
-      const value = child.val() || {};
-      if (!uid || value.leaderUid === uid) rows.push({ id: child.key, ...value });
-    });
-    rows.sort((a,b) => Number(a.week || 99) - Number(b.week || 99));
-    callback(rows);
-  };
-  ref.on('value', handler);
-  return () => ref.off('value', handler);
-}
-
-export function subscribeRounds(callback) {
-  const ref = db.ref('lor/rounds');
-  const handler = snap => {
-    const rows = [];
-    snap.forEach(child => rows.push({ id: child.key, ...(child.val() || {}) }));
-    rows.sort((a,b) => Number(b.startedAt || 0) - Number(a.startedAt || 0));
-    callback(rows);
-  };
-  ref.on('value', handler);
-  return () => ref.off('value', handler);
-}
-
-export async function createRound({ planId = null, leader, department, theme, themeVersion = 1, week = null, positiveStart = '' }) {
-  const ref = db.ref('lor/rounds').push();
-  const payload = {
-    planId,
-    planWeek: week,
-    source: planId ? 'plan' : 'manual',
-    leaderUid: leader.uid,
-    leaderName: leader.name,
-    department,
-    theme,
-    themeVersion,
-    positiveStart: String(positiveStart || '').trim(),
-    status: 'Pågår',
-    startedAt: serverTimestamp(),
-    createdAt: serverTimestamp(),
-    updatedAt: serverTimestamp(),
-    responses: {},
-    employeeInterviews: {},
-    observations: {},
-    actions: {},
-  };
-  await ref.set(payload);
-  return ref.key;
-}
-
-export async function saveResponse(roundId, questionId, response) {
-  const updates = {};
-  updates[`lor/rounds/${roundId}/responses/${questionId}`] = { ...response, updatedAt: serverTimestamp() };
-  updates[`lor/rounds/${roundId}/updatedAt`] = serverTimestamp();
-  return db.ref().update(updates);
-}
-
-export async function addEmployeeInterview(roundId, interview) {
-  const ref = db.ref(`lor/rounds/${roundId}/employeeInterviews`).push();
-  return ref.set({ ...interview, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
-}
-
-export async function completeRound(roundId, summary) {
-  return db.ref(`lor/rounds/${roundId}`).update({
-    status: summary.needsFollowUp ? 'Oppfølging pågår' : 'Gjennomført',
-    summary,
-    completedAt: serverTimestamp(),
-    updatedAt: serverTimestamp(),
-  });
-}
-
-export async function addComment(objectType, objectId, user, text) {
-  const ref = db.ref(`lor/comments/${objectType}/${objectId}`).push();
-  return ref.set({ text: String(text || '').trim(), authorUid: user.uid, authorName: user.name, createdAt: serverTimestamp() });
-}
+const rowsFrom = snap => { const rows=[]; snap.forEach(c=>rows.push({id:c.key,...(c.val()||{})})); return rows; };
+export function subscribePlannedRounds(uid,cb){const ref=db.ref('lor/plans'),h=s=>cb(rowsFrom(s).filter(x=>!uid||x.leaderUid===uid).sort((a,b)=>Number(a.week||99)-Number(b.week||99)));ref.on('value',h);return()=>ref.off('value',h)}
+export function subscribeRounds(cb){const ref=db.ref('lor/rounds'),h=s=>cb(rowsFrom(s).sort((a,b)=>Number(b.startedAt||b.completedAt||0)-Number(a.startedAt||a.completedAt||0)));ref.on('value',h);return()=>ref.off('value',h)}
+export function subscribeThemes(cb){const ref=db.ref('lor/themes'),h=s=>cb(rowsFrom(s).sort((a,b)=>(a.name||'').localeCompare(b.name||'')));ref.on('value',h);return()=>ref.off('value',h)}
+export async function createRound({planId=null,leader,department,theme,themeVersion=1,week=null,positiveStart=''}){const ref=db.ref('lor/rounds').push();await ref.set({planId,planWeek:week,source:planId?'plan':'manual',leaderUid:leader.uid,leaderName:leader.name,department,theme,themeVersion,positiveStart:String(positiveStart||'').trim(),status:'Pågår',startedAt:serverTimestamp(),createdAt:serverTimestamp(),updatedAt:serverTimestamp(),responses:{},employeeInterviews:{},observations:{},actions:{}});return ref.key}
+export async function saveResponse(id,qid,response){return db.ref().update({[`lor/rounds/${id}/responses/${qid}`]:{...response,updatedAt:serverTimestamp()},[`lor/rounds/${id}/updatedAt`]:serverTimestamp()})}
+export async function addEmployeeInterview(id,data){return db.ref(`lor/rounds/${id}/employeeInterviews`).push().set({...data,createdAt:serverTimestamp(),updatedAt:serverTimestamp()})}
+export async function completeRound(id,summary){return db.ref(`lor/rounds/${id}`).update({status:summary.needsFollowUp?'Oppfølging pågår':'Gjennomført',summary,completedAt:serverTimestamp(),updatedAt:serverTimestamp()})}
+export async function updateRound(id,patch,user){return db.ref(`lor/rounds/${id}`).update({...patch,updatedAt:serverTimestamp(),lastEditedBy:user?.name||'',lastEditedByUid:user?.uid||''})}
+export async function saveTheme(theme){const id=theme.id||db.ref('lor/themes').push().key;await db.ref(`lor/themes/${id}`).set({...theme,id:undefined,active:theme.active!==false,updatedAt:serverTimestamp()});return id}
+export async function deleteTheme(id){return db.ref(`lor/themes/${id}`).update({active:false,updatedAt:serverTimestamp()})}
+export async function createMasterAction({round,finding,user,title,description,owner='',dueDate=''}){const ref=db.ref('tiltak').push();const payload={title,description,owner,dueDate,status:'Ikke startet',category:'LOR',source:'LOR',sourceRoundId:round.id,sourceTheme:round.theme,sourceDepartment:round.department,sourceFinding:finding||'',createdBy:user.name,createdByUid:user.uid,createdAt:serverTimestamp(),updatedAt:serverTimestamp()};await ref.set(payload);await db.ref(`lor/rounds/${round.id}/actions/${ref.key}`).set({masterTaskId:ref.key,title,status:'Opprettet',createdAt:serverTimestamp()});return ref.key}
+export async function addComment(type,id,user,text){return db.ref(`lor/comments/${type}/${id}`).push().set({text:String(text||'').trim(),authorUid:user.uid,authorName:user.name,createdAt:serverTimestamp()})}
