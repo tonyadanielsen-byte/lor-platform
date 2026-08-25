@@ -5,216 +5,46 @@ import { loadSeedData, planForUser } from './seed-data.js';
 
 const app = document.querySelector('#app');
 const toastEl = document.querySelector('#toast');
+const state = { activeView:'dashboard', user:null, authReady:false, authError:'', plans:[], livePlans:[], rounds:[], liveRounds:[], roundController:null, unsubscribers:[], seedReady:false, seedPlan:null, themeBank:null, legacyHistory:[] };
+const views = [['dashboard','Dashboard'],['mine','Mine LOR'],['round','Gjennomfør LOR'],['themes','Temabank'],['analytics','Analyse']];
 
-const state = {
-  activeView: 'dashboard',
-  user: null,
-  authReady: false,
-  authError: '',
-  plans: [],
-  rounds: [],
-  roundController: null,
-  unsubscribers: [],
-  seedReady: false,
-  seedPlan: null,
-  themeBank: null,
-  legacyHistory: [],
-};
+function notify(message,error=false){toastEl.textContent=message;toastEl.classList.toggle('error',error);toastEl.classList.add('show');clearTimeout(notify.timer);notify.timer=setTimeout(()=>toastEl.classList.remove('show'),3600)}
+function displayName(name=''){const first=String(name).trim().split(/\s+/)[0];return first||'leder'}
+function navButtons(){return views.map(([id,label])=>`<button class="${state.activeView===id?'active':''}" data-view="${id}">${label}</button>`).join('')}
+function loginView(){return `<div class="login-screen"><div class="login-card"><div class="login-mark">LOR</div><span class="eyebrow">Nortura Sarpsborg</span><h1>Velkommen tilbake</h1><p>Logg inn med samme bruker som i Master tiltaksliste.</p>${state.authError?`<div class="login-error">${state.authError}</div>`:''}<form id="loginForm"><label>E-post<input id="loginEmail" type="email" autocomplete="username" required placeholder="navn@nortura.no"></label><label>Passord<input id="loginPassword" type="password" autocomplete="current-password" required></label><button class="primary-action full-action" type="submit">Logg inn</button><button class="text-action" type="button" id="forgotPassword">Glemt passord?</button></form></div></div>`}
+function kpi(label,value,hint='',tone=''){return `<article class="card kpi ${tone}"><span>${label}</span><strong>${value}</strong>${hint?`<small>${hint}</small>`:''}</article>`}
 
-const views = [
-  ['dashboard', 'Dashboard'],
-  ['mine', 'Mine LOR'],
-  ['round', 'Gjennomfør LOR'],
-  ['themes', 'Temabank'],
-  ['analytics', 'Analyse'],
-];
+function normalizeLegacyRound(row){return {id:`legacy-${row.year||row.date||''}-${row.week}-${row.leader||''}`,theme:row.theme,department:row.department,leaderName:row.leader,status:row.date?'Gjennomført':'Ikke registrert',completedAt:row.date?new Date(`${row.date}T12:00:00`).getTime():null,startedAt:row.date?new Date(`${row.date}T12:00:00`).getTime():null,summary:{counts:{deviation:row.ok===false?1:0}},legacy:true}}
+function currentWeek(){const d=new Date(),date=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())),day=date.getUTCDay()||7;date.setUTCDate(date.getUTCDate()+4-day);const start=new Date(Date.UTC(date.getUTCFullYear(),0,1));return Math.ceil((((date-start)/86400000)+1)/7)}
+function planDone(plan){return state.liveRounds.some(r=>r.planId===plan.id || (r.planWeek&&Number(r.planWeek)===Number(plan.week)&&r.theme===(plan.theme||plan.themeName)&&r.leaderUid===state.user?.uid))}
+function usablePlans(){return state.plans.filter(p=>p.status!=='needsReview')}
+function nextPlan(){const week=currentWeek();return usablePlans().filter(p=>!planDone(p)).sort((a,b)=>{const af=Number(a.week)>=week?0:1,bf=Number(b.week)>=week?0:1;return af-bf||Number(a.week)-Number(b.week)})[0]||null}
+function stats(){const year=new Date().getFullYear();const liveYear=state.liveRounds.filter(r=>{const t=Number(r.startedAt||r.completedAt||0);return !t||new Date(t).getFullYear()===year});const completed=liveYear.filter(r=>['Gjennomført','Oppfølging pågår','Lukket'].includes(r.status)).length;const plan=usablePlans();const planCompleted=plan.filter(planDone).length;const rate=plan.length?Math.round((planCompleted/plan.length)*100):0;const open=liveYear.filter(r=>r.status==='Oppfølging pågår').length;const deviations=liveYear.reduce((s,r)=>s+Number(r.summary?.counts?.deviation||0),0);const improvements=liveYear.reduce((s,r)=>s+Number(r.summary?.counts?.improvement||0),0);return {completed,planTotal:plan.length,planCompleted,rate,open,deviations,improvements}}
+function formatDate(stamp){return stamp?new Date(Number(stamp)).toLocaleDateString('nb-NO',{day:'2-digit',month:'2-digit',year:'numeric'}):''}
 
-function notify(message, error = false) {
-  toastEl.textContent = message;
-  toastEl.classList.toggle('error', error);
-  toastEl.classList.add('show');
-  clearTimeout(notify.timer);
-  notify.timer = setTimeout(() => toastEl.classList.remove('show'), 3600);
-}
+function recentRounds(){if(!state.rounds.length)return '<div class="empty-state">Ingen LOR er registrert ennå.</div>';return `<div class="round-list">${state.rounds.slice(0,7).map(r=>`<div class="round-row"><div><strong>${r.theme||'LOR'}</strong><span>${r.department||''} · ${r.leaderName||''}${r.legacy?' · historikk':''}</span></div><div class="round-row-end"><span>${formatDate(r.completedAt)}</span><span class="status-pill ${r.status==='Oppfølging pågår'?'attention':''}">${r.status||'Pågår'}</span></div></div>`).join('')}</div>`}
 
-function displayName(name = '') {
-  const first = String(name).trim().split(/\s+/)[0];
-  return first || 'leder';
-}
+function dashboardView(){const s=stats(),next=nextPlan();return `<section class="hero dashboard-hero"><div><span class="eyebrow">Lederoppfølging · 2026</span><h1>God dag, ${displayName(state.user.name)}</h1><p>Her ser du gjennomføring, funn og hva som trenger oppmerksomhet.</p></div><button class="primary-action" data-view="round">+ Start LOR</button></section><section class="kpi-grid dashboard-kpis">${kpi('Plan gjennomført',`${s.rate} %`,`${s.planCompleted} av ${s.planTotal} planlagte`,'kpi-primary')}${kpi('Gjennomførte runder',s.completed,'registrert i appen')}${kpi('Åpne oppfølginger',s.open,s.open?'krever handling':'ingen åpne','kpi-warning')}${kpi('Forbedringspunkter',s.improvements,'fra digitale runder')}${kpi('Registrerte avvik',s.deviations,'fra digitale runder','kpi-danger')}</section><section class="grid-2 dashboard-grid"><article class="card panel"><div class="panel-head"><div><span class="eyebrow">Historikk</span><h2>Siste runder</h2></div><button class="text-action" data-view="mine">Se Mine LOR →</button></div>${recentRounds()}</article><article class="card panel next-round premium-next"><span class="eyebrow">Neste oppgave</span><h2>${next?`Uke ${next.week} · ${next.theme||next.themeName}`:'Ingen planlagt runde'}</h2>${next?`<div class="meta"><span class="chip">${next.department||'Avdeling'}</span><span class="chip">${next.theme||next.themeName}</span></div><p class="muted">Planlagt for ${displayName(state.user.name)}</p><button class="primary-action full-action" data-view="round">Start planlagt LOR →</button>`:'<p class="muted">Ingen utestående planlagt runde ble funnet.</p>'}<div class="insight"><strong>★ Start positivt</strong><br>Fang det som fungerer før du går inn i kontrollpunkter og forbedringer.</div></article></section>`}
 
-function navButtons() {
-  return views.map(([id,label]) => `<button class="${state.activeView === id ? 'active' : ''}" data-view="${id}">${label}</button>`).join('');
-}
+function mineView(){const first=displayName(state.user.name).toLowerCase();const mine=state.rounds.filter(r=>r.leaderUid===state.user.uid||displayName(r.leaderName).toLowerCase()===first);return `<section class="hero"><div><span class="eyebrow">Personlig oversikt</span><h1>Mine LOR</h1><p>Plan, gjennomføring og historikk for ${displayName(state.user.name)}.</p></div><button class="primary-action" data-view="round">+ Start LOR</button></section><section class="grid-2"><article class="card panel"><div class="panel-head"><h2>Plan 2026</h2><span class="chip">${state.plans.length} runder</span></div><div class="round-list">${state.plans.length?state.plans.map(r=>`<div class="round-row"><div><strong>Uke ${r.week} · ${r.theme||r.themeName||'Tema mangler'}</strong><span>${r.department||'Avdeling mangler'}</span></div><span class="status-pill ${planDone(r)?'done':''}">${r.status==='needsReview'?'Avklares':planDone(r)?'Gjennomført':'Planlagt'}</span></div>`).join(''):'<div class="empty-state">Ingen planlagte runder er knyttet til deg.</div>'}</div></article><article class="card panel"><h2>Historikk</h2>${mine.length?`<div class="round-list">${mine.slice(0,20).map(r=>`<div class="round-row"><div><strong>${r.theme||'LOR'}</strong><span>${r.department||''} · ${r.status||''}</span></div><span>${formatDate(r.completedAt)||'Pågår'}</span></div>`).join('')}</div>`:'<div class="empty-state">Du har ingen registrerte LOR ennå.</div>'}</article></section>`}
 
-function loginView() {
-  return `<div class="login-screen"><div class="login-card"><div class="login-mark">LOR</div><h1>Logg inn</h1><p>Samme sikre bruker som i OpEx-master.</p>${state.authError ? `<div class="login-error">${state.authError}</div>` : ''}<form id="loginForm"><label>E-post<input id="loginEmail" type="email" autocomplete="username" required placeholder="navn@nortura.no"></label><label>Passord<input id="loginPassword" type="password" autocomplete="current-password" required></label><button class="primary-action full-action" type="submit">Logg inn</button><button class="text-action" type="button" id="forgotPassword">Glemt passord?</button></form></div></div>`;
-}
+function themeBankView(){const shared=state.themeBank?.sharedThemes||[],department=state.themeBank?.departmentThemes||[];const total=shared.reduce((n,t)=>n+(t.questions?.length||0),0)+department.reduce((n,t)=>n+(t.questions?.length||Object.values(t.variants||{})[0]?.length||0),0);return `<section class="hero"><div><span class="eyebrow">Faglig grunnlag</span><h1>Temabank</h1><p>Spørsmål og kontrollpunkter importert fra LOR-arbeidsbøkene.</p></div></section><section class="kpi-grid">${kpi('Felles temaer',shared.length)}${kpi('Utvidede temaer',department.length)}${kpi('Kontrollpunkter',total)}${kpi('Gjeldende versjon','V1','Excel 2025/2026')}</section><section class="grid-2"><article class="card panel"><h2>Felles temaer</h2><div class="round-list">${shared.map(t=>`<div class="round-row"><div><strong>${t.name}</strong><span>${t.purpose||''}</span></div><span>${t.questions.length} pkt.</span></div>`).join('')}</div></article><article class="card panel"><h2>Avdelingsspesifikke temaer</h2><div class="round-list">${department.map(t=>`<div class="round-row"><div><strong>${t.name}</strong><span>${(t.departments||[]).join(' · ')}</span></div><span>V1</span></div>`).join('')}</div></article></section>`}
+function analyticsView(){return `<section class="hero"><div><span class="eyebrow">Analyse</span><h1>Utvikling og innsikt</h1><p>Datagrunnlaget bygges nå gjennom faktiske LOR-runder.</p></div></section><section class="grid-2"><article class="card panel"><h2>Kommer i neste analyseleveranse</h2><div class="analytics-roadmap"><div><b>01</b><span>Trend per tema og avdeling</span></div><div><b>02</b><span>Gjentagende funn og kontrollpunkter</span></div><div><b>03</b><span>Lederstatus og gjennomføring</span></div><div><b>04</b><span>LOR-funn → Master-tiltak → lukketid</span></div></div></article><article class="card panel"><div class="insight"><strong>Dataprinsipp</strong><br>Vi bygger analyse på reelle, strukturerte runder – ikke pyntedata som gir et misvisende dashboard.</div></article></section>`}
 
-function kpi(label, value, hint='') {
-  return `<article class="card kpi"><span>${label}</span><strong>${value}</strong>${hint ? `<small>${hint}</small>` : ''}</article>`;
-}
+function currentView(){if(state.activeView==='dashboard')return dashboardView();if(state.activeView==='mine')return mineView();if(state.activeView==='round'){if(!state.roundController){state.roundController=createRoundController({user:state.user,notify,themeBank:state.themeBank,initialPlan:nextPlan(),onDone:()=>{state.roundController=null;state.activeView='dashboard';render()}})}return state.roundController.render()}if(state.activeView==='themes')return themeBankView();return analyticsView()}
+function shell(){return `<div class="app-shell"><header class="topbar"><div class="topbar-inner"><button class="brand brand-button" data-view="dashboard"><strong>LOR</strong><span>Lederoppfølging · Sarpsborg</span></button><nav class="nav">${navButtons()}</nav><div class="user-menu"><div class="user-avatar">${displayName(state.user.name).slice(0,1)}</div><span>${displayName(state.user.name)}</span><button id="logoutButton">Logg ut</button></div></div></header><main class="main">${currentView()}</main></div>`}
+function render(){if(!state.authReady||!state.seedReady){app.innerHTML='<div class="loading-screen">Laster LOR…</div>';return}app.innerHTML=state.user?shell():loginView()}
+function clearSubscriptions(){state.unsubscribers.forEach(fn=>fn?.());state.unsubscribers=[]}
+function seedPlansForCurrentUser(){return planForUser(state.seedPlan,state.user?.name).map((row,index)=>({id:`seed-plan-${row.week}-${index}`,...row,theme:row.themeName}))}
+function seedHistory(){return state.legacyHistory.map(normalizeLegacyRound).sort((a,b)=>Number(b.startedAt||0)-Number(a.startedAt||0))}
+function rebuildData(){const seedPlans=seedPlansForCurrentUser();state.plans=state.livePlans.length?state.livePlans:seedPlans;const legacy=seedHistory();state.rounds=[...state.liveRounds,...legacy].sort((a,b)=>Number(b.startedAt||0)-Number(a.startedAt||0));render()}
+function connectData(){clearSubscriptions();if(!state.user)return;state.unsubscribers.push(subscribePlannedRounds(state.user.uid,plans=>{state.livePlans=plans;rebuildData()}));state.unsubscribers.push(subscribeRounds(rounds=>{state.liveRounds=rounds;rebuildData()}))}
 
-function normalizeLegacyRound(row) {
-  return {
-    id: `legacy-${row.year || row.date || ''}-${row.week}-${row.leader || ''}`,
-    theme: row.theme,
-    department: row.department,
-    leaderName: row.leader,
-    status: row.date ? 'Gjennomført' : 'Ikke registrert',
-    completedAt: row.date ? new Date(`${row.date}T12:00:00`).getTime() : null,
-    startedAt: row.date ? new Date(`${row.date}T12:00:00`).getTime() : null,
-    summary: { counts: { deviation: row.ok === false ? 1 : 0 } },
-    legacy: true,
-  };
-}
+app.addEventListener('click',async event=>{const viewButton=event.target.closest('[data-view]');if(viewButton){state.activeView=viewButton.dataset.view;if(state.activeView!=='round')state.roundController=null;render();return}if(event.target.closest('#logoutButton')){await signOut();return}if(event.target.closest('#forgotPassword')){const email=document.querySelector('#loginEmail')?.value?.trim();if(!email)return notify('Skriv inn e-postadressen først.',true);try{await sendPasswordReset(email);notify('E-post for nytt passord er sendt.')}catch{notify('Kunne ikke sende e-post for passordbytte.',true)}return}if(state.activeView==='round'&&state.roundController){try{const result=await state.roundController.handle(event.target,app);if(result?.rerender)render()}catch(error){console.error(error);notify(error?.message?.includes('PERMISSION_DENIED')?'Firebase mangler LOR-regler.':'Kunne ikke lagre. Prøv igjen.',true)}}})
+app.addEventListener('change',event=>{if(event.target.id==='interviewAnonymous'){const wrap=document.querySelector('#employeeNameWrap');if(wrap)wrap.hidden=event.target.checked}if(state.activeView==='round'&&state.roundController?.handleChange(event.target))render()})
+app.addEventListener('submit',async event=>{if(event.target.id!=='loginForm')return;event.preventDefault();state.authError='';const button=event.target.querySelector('button[type="submit"]');button.disabled=true;button.textContent='Logger inn…';try{await signIn(document.querySelector('#loginEmail').value,document.querySelector('#loginPassword').value)}catch(error){state.authError=error.friendlyMessage||'Innloggingen mislyktes.';render()}})
 
-function stats() {
-  const currentYear = new Date().getFullYear();
-  const yearRounds = state.rounds.filter(r => {
-    const stamp = Number(r.startedAt || r.completedAt || 0);
-    return stamp ? new Date(stamp).getFullYear() === currentYear : true;
-  });
-  const completed = yearRounds.filter(r => ['Gjennomført','Oppfølging pågår','Lukket'].includes(r.status)).length;
-  const planned = Math.max(state.plans.length, completed);
-  const rate = planned ? Math.round((completed / planned) * 100) : 0;
-  const openFollowUp = yearRounds.filter(r => r.status === 'Oppfølging pågår').length;
-  const deviations = yearRounds.reduce((sum,r) => sum + Number(r.summary?.counts?.deviation || 0), 0);
-  return { planned, completed, rate, openFollowUp, deviations };
-}
-
-function dashboardView() {
-  const s = stats();
-  const next = state.plans.find(p => !p.completedAt && p.status !== 'needsReview') || state.plans[0] || null;
-  return `<section class="hero"><div><h1>Lederoppfølgingsrunder</h1><p>God dag, ${displayName(state.user.name)}. Her ser du status hittil i år.</p></div><button class="primary-action" data-view="round">+ Start LOR</button></section><section class="kpi-grid" aria-label="Nøkkeltall">${kpi('Gjennomført', s.completed, `av ${s.planned || '–'} planlagte`)}${kpi('Gjennomføringsgrad', `${s.rate} %`)}${kpi('Åpne oppfølginger', s.openFollowUp)}${kpi('Registrerte avvik', s.deviations)}</section><section class="grid-2"><article class="card panel"><h2>Siste runder</h2>${recentRounds()}</article><article class="card panel next-round"><div><h2>Din neste runde</h2>${next ? `<div class="meta"><span class="chip">${next.week ? `Uke ${next.week}` : 'Planlagt'}</span><span class="chip">${next.department || 'Avdeling må avklares'}</span><span class="chip">${next.theme || next.themeName || 'Tema må avklares'}</span></div><p class="muted">${next.status === 'needsReview' ? 'Importert fra Excel · trenger avklaring' : 'Importert fra LOR-plan 2026'}</p>` : '<p class="muted">Ingen planlagt runde ligger klar ennå.</p>'}</div><button class="primary-action" data-view="round">Start LOR</button><div class="insight"><strong>Prinsipp</strong><br>Start med positiv feedback. Funn skal brukes til læring og forbedring – ikke til å premiere færrest mulig avvik.</div></article></section>`;
-}
-
-function recentRounds() {
-  if (!state.rounds.length) return '<div class="empty-state">Ingen LOR er registrert ennå. Den første gjennomførte runden vil dukke opp her.</div>';
-  return `<div class="round-list">${state.rounds.slice(0,6).map(r => `<div class="round-row"><div><strong>${r.theme || 'LOR'}</strong><span>${r.department || ''} · ${r.leaderName || ''}${r.legacy ? ' · historikk' : ''}</span></div><span class="status-pill">${r.status || 'Pågår'}</span></div>`).join('')}</div>`;
-}
-
-function mineView() {
-  const first = displayName(state.user.name).toLowerCase();
-  const mineRounds = state.rounds.filter(r => r.leaderUid === state.user.uid || displayName(r.leaderName).toLowerCase() === first);
-  const planRows = state.plans;
-  return `<section class="hero"><div><h1>Mine LOR</h1><p>Personlig plan, historikk og oppfølging.</p></div><button class="primary-action" data-view="round">+ Start LOR</button></section><section class="grid-2"><article class="card panel"><h2>Plan 2026</h2>${planRows.length ? `<div class="round-list">${planRows.map(r => `<div class="round-row"><div><strong>Uke ${r.week} · ${r.theme || r.themeName || 'Tema mangler'}</strong><span>${r.department || 'Avdeling mangler'}</span></div><span class="status-pill">${r.status === 'needsReview' ? 'Avklares' : 'Planlagt'}</span></div>`).join('')}</div>` : '<div class="empty-state">Ingen planlagte runder er knyttet til deg.</div>'}</article><article class="card panel"><h2>Historikk</h2>${mineRounds.length ? `<div class="round-list">${mineRounds.map(r => `<div class="round-row"><div><strong>${r.theme || 'LOR'}</strong><span>${r.department || ''} · ${r.status || ''}</span></div><span>${r.completedAt ? new Date(r.completedAt).toLocaleDateString('nb-NO') : 'Pågår'}</span></div>`).join('')}</div>` : '<div class="empty-state">Du har ingen registrerte LOR ennå.</div>'}</article></section>`;
-}
-
-function themeBankView() {
-  const shared = state.themeBank?.sharedThemes || [];
-  const department = state.themeBank?.departmentThemes || [];
-  const totalQuestions = shared.reduce((n,t) => n + (t.questions?.length || 0), 0) + department.reduce((n,t) => n + (t.questions?.length || Object.values(t.variants || {})[0]?.length || 0), 0);
-  return `<section class="hero"><div><h1>Temabank</h1><p>Reell spørsmålsbank importert fra LOR-arbeidsbøkene.</p></div></section><section class="kpi-grid">${kpi('Felles temaer', shared.length)}${kpi('Utvidede temaer', department.length)}${kpi('Kontrollpunkter', totalQuestions)}${kpi('Versjon', 'V1', '2025 = 2026-kilde')}</section><section class="grid-2"><article class="card panel"><h2>Felles temaer</h2><div class="round-list">${shared.map(t => `<div class="round-row"><div><strong>${t.name}</strong><span>${t.purpose || ''}</span></div><span>${t.questions.length} pkt.</span></div>`).join('')}</div></article><article class="card panel"><h2>Avdelingsspesifikke temaer</h2><div class="round-list">${department.map(t => `<div class="round-row"><div><strong>${t.name}</strong><span>${(t.departments || []).join(' · ')}</span></div><span>V1</span></div>`).join('')}</div></article></section>`;
-}
-
-function placeholderView(title, text) {
-  return `<section class="hero"><div><h1>${title}</h1><p>${text}</p></div></section><article class="card panel"><div class="placeholder-chart">Datamodellen er klar. Denne modulen kobles på i neste leveranse.</div></article>`;
-}
-
-function currentView() {
-  if (state.activeView === 'dashboard') return dashboardView();
-  if (state.activeView === 'mine') return mineView();
-  if (state.activeView === 'round') {
-    if (!state.roundController) {
-      const initialPlan = state.plans.find(p => p.status !== 'needsReview') || state.plans[0] || null;
-      state.roundController = createRoundController({ user: state.user, notify, themeBank: state.themeBank, initialPlan, onDone: () => { state.roundController = null; state.activeView = 'dashboard'; render(); } });
-    }
-    return state.roundController.render();
-  }
-  if (state.activeView === 'themes') return themeBankView();
-  return placeholderView('Analyse', 'Historikk, trender, gjentagende funn og forslag til videre fokus.');
-}
-
-function shell() {
-  return `<div class="app-shell"><header class="topbar"><div class="topbar-inner"><div class="brand"><strong>LOR</strong><span>Nortura Sarpsborg</span></div><nav class="nav">${navButtons()}</nav><div class="user-menu"><span>${displayName(state.user.name)}</span><button id="logoutButton" title="Logg ut">Logg ut</button></div></div></header><main class="main">${currentView()}</main></div>`;
-}
-
-function render() {
-  if (!state.authReady || !state.seedReady) { app.innerHTML = '<div class="loading-screen">Laster LOR…</div>'; return; }
-  app.innerHTML = state.user ? shell() : loginView();
-}
-
-function clearSubscriptions() {
-  state.unsubscribers.forEach(fn => fn?.());
-  state.unsubscribers = [];
-}
-
-function seedPlansForCurrentUser() {
-  return planForUser(state.seedPlan, state.user?.name).map((row,index) => ({ id: `seed-plan-${row.week}-${index}`, ...row, theme: row.themeName }));
-}
-
-function seedHistory() {
-  return state.legacyHistory.map(normalizeLegacyRound).sort((a,b) => Number(b.startedAt || 0) - Number(a.startedAt || 0));
-}
-
-function connectData() {
-  clearSubscriptions();
-  if (!state.user) return;
-  state.unsubscribers.push(subscribePlannedRounds(state.user.uid, plans => { state.plans = plans.length ? plans : seedPlansForCurrentUser(); render(); }));
-  state.unsubscribers.push(subscribeRounds(rounds => { state.rounds = rounds.length ? rounds : seedHistory(); render(); }));
-}
-
-app.addEventListener('click', async event => {
-  const viewButton = event.target.closest('[data-view]');
-  if (viewButton) { state.activeView = viewButton.dataset.view; if (state.activeView !== 'round') state.roundController = null; render(); return; }
-  if (event.target.closest('#logoutButton')) { await signOut(); return; }
-  if (event.target.closest('#forgotPassword')) {
-    const email = document.querySelector('#loginEmail')?.value?.trim();
-    if (!email) return notify('Skriv inn e-postadressen først.', true);
-    try { await sendPasswordReset(email); notify('E-post for nytt passord er sendt.'); } catch { notify('Kunne ikke sende e-post for passordbytte.', true); }
-    return;
-  }
-  if (state.activeView === 'round' && state.roundController) {
-    try {
-      const result = await state.roundController.handle(event.target, app);
-      if (result?.rerender) render();
-    } catch (error) {
-      console.error(error);
-      notify(error?.message?.includes('PERMISSION_DENIED') ? 'Firebase mangler LOR-regler. Se database.rules.json i repoet.' : 'Kunne ikke lagre. Prøv igjen.', true);
-    }
-  }
-});
-
-app.addEventListener('change', event => {
-  if (event.target.id === 'interviewAnonymous') {
-    const wrap = document.querySelector('#employeeNameWrap');
-    if (wrap) wrap.hidden = event.target.checked;
-  }
-  if (state.activeView === 'round' && state.roundController?.handleChange(event.target)) render();
-});
-
-app.addEventListener('submit', async event => {
-  if (event.target.id !== 'loginForm') return;
-  event.preventDefault();
-  state.authError = '';
-  const button = event.target.querySelector('button[type="submit"]');
-  button.disabled = true;
-  button.textContent = 'Logger inn…';
-  try { await signIn(document.querySelector('#loginEmail').value, document.querySelector('#loginPassword').value); }
-  catch (error) { state.authError = error.friendlyMessage || 'Innloggingen mislyktes.'; render(); }
-});
-
-loadSeedData().then(seed => {
-  state.seedPlan = seed.plan2026;
-  state.themeBank = seed.themeBank;
-  state.legacyHistory = seed.legacyHistory;
-  state.seedReady = true;
-  if (state.user) connectData();
-  render();
-}).catch(error => {
-  console.error('[LOR seed]', error);
-  state.seedReady = true;
-  notify('Kunne ikke laste Excel-grunnlaget.', true);
-  render();
-});
-
-onAuth(user => {
-  state.user = user;
-  state.authReady = true;
-  state.roundController = null;
-  if (user && state.seedReady) connectData(); else clearSubscriptions();
-  render();
-});
-
+loadSeedData().then(seed=>{state.seedPlan=seed.plan2026;state.themeBank=seed.themeBank;state.legacyHistory=seed.legacyHistory;state.seedReady=true;if(state.user)connectData();render()}).catch(error=>{console.error('[LOR seed]',error);state.seedReady=true;notify('Kunne ikke laste Excel-grunnlaget.',true);render()});
+onAuth(user=>{state.user=user;state.authReady=true;state.roundController=null;if(user&&state.seedReady)connectData();else clearSubscriptions();render()});
 render();
-if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(console.error));
+if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(console.error));
