@@ -8,7 +8,7 @@ export function subscribePlannedRounds(uid, callback) {
       const value = child.val() || {};
       if (!uid || value.leaderUid === uid) rows.push({ id: child.key, ...value });
     });
-    rows.sort((a,b) => String(a.plannedDate || '').localeCompare(String(b.plannedDate || '')));
+    rows.sort((a,b) => Number(a.week || 99) - Number(b.week || 99));
     callback(rows);
   };
   ref.on('value', handler);
@@ -27,17 +27,21 @@ export function subscribeRounds(callback) {
   return () => ref.off('value', handler);
 }
 
-export async function createRound({ planId = null, leader, department, theme, themeVersion = 1 }) {
+export async function createRound({ planId = null, leader, department, theme, themeVersion = 1, week = null, positiveStart = '' }) {
   const ref = db.ref('lor/rounds').push();
   const payload = {
     planId,
+    planWeek: week,
+    source: planId ? 'plan' : 'manual',
     leaderUid: leader.uid,
     leaderName: leader.name,
     department,
     theme,
     themeVersion,
+    positiveStart: String(positiveStart || '').trim(),
     status: 'Pågår',
     startedAt: serverTimestamp(),
+    createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
     responses: {},
     employeeInterviews: {},
@@ -50,17 +54,14 @@ export async function createRound({ planId = null, leader, department, theme, th
 
 export async function saveResponse(roundId, questionId, response) {
   const updates = {};
-  updates[`lor/rounds/${roundId}/responses/${questionId}`] = {
-    ...response,
-    updatedAt: serverTimestamp(),
-  };
+  updates[`lor/rounds/${roundId}/responses/${questionId}`] = { ...response, updatedAt: serverTimestamp() };
   updates[`lor/rounds/${roundId}/updatedAt`] = serverTimestamp();
   return db.ref().update(updates);
 }
 
 export async function addEmployeeInterview(roundId, interview) {
   const ref = db.ref(`lor/rounds/${roundId}/employeeInterviews`).push();
-  return ref.set({ ...interview, createdAt: serverTimestamp() });
+  return ref.set({ ...interview, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
 }
 
 export async function completeRound(roundId, summary) {
@@ -74,23 +75,5 @@ export async function completeRound(roundId, summary) {
 
 export async function addComment(objectType, objectId, user, text) {
   const ref = db.ref(`lor/comments/${objectType}/${objectId}`).push();
-  return ref.set({
-    text: String(text || '').trim(),
-    authorUid: user.uid,
-    authorName: user.name,
-    createdAt: serverTimestamp(),
-  });
+  return ref.set({ text: String(text || '').trim(), authorUid: user.uid, authorName: user.name, createdAt: serverTimestamp() });
 }
-
-export const defaultTheme = {
-  id: 'hygiene-v1',
-  name: 'Hygiene',
-  version: 1,
-  questions: [
-    { id: 'q1', text: 'Blir riktig bekledning benyttet?' },
-    { id: 'q2', text: 'Er håndhygiene og hygienerutiner fulgt?' },
-    { id: 'q3', text: 'Er området ryddig og hygienisk tilfredsstillende?' },
-    { id: 'q4', text: 'Er relevante rutiner kjent og etterlevd?' },
-    { id: 'q5', text: 'Er det forhold som bør forbedres eller følges opp?' },
-  ],
-};
