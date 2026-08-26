@@ -4,14 +4,14 @@
   "short_name": "LOR",
   "description": "Digital lederoppfølging for Nortura Sarpsborg.",
   "lang": "nb-NO",
-  "start_url": "/lor-platform/?app=373",
+  "start_url": "/lor-platform/?app=374",
   "scope": "/lor-platform/",
   "display": "standalone",
   "orientation": "any",
   "background_color": "#F4F7FB",
   "theme_color": "#1F7A55",
   "icons": [
-    {"src":"./icons/lor-icon-192.png?v=3.7.3","sizes":"192x192","type":"image/png","purpose":"any maskable"},
-    {"src":"./lor-icon.svg?v=3.7.3","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}
+    {"src":"./icons/lor-icon-192.png?v=3.7.4","sizes":"192x192","type":"image/png","purpose":"any maskable"},
+    {"src":"./lor-icon.svg?v=3.7.4","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}
   ]
 }
