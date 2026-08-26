@@ -1,0 +1,3 @@
+/* V3.7.1: prevent the legacy dashboard from flashing before the consolidated annual-plan render is ready. */
+#v35Dashboard:not(.v371-ready){opacity:0!important;pointer-events:none!important}
+#v35Dashboard.v371-ready{opacity:1!important;transition:opacity .12s ease}
