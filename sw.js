@@ -9,7 +9,7 @@ self.addEventListener('activate',event=>{
       for(const client of clients){
         if('navigate' in client){
           const u=new URL(client.url);
-          u.searchParams.set('_lorBuild','374');
+          u.searchParams.set('_lorBuild','375');
           client.navigate(u.toString());
         }
       }
