@@ -1,0 +1,26 @@
+/* V3.7.4: final cleanup for dashboard + consistent theme dialog */
+#v35Dashboard #v363AnnualDash{display:none!important}
+#v35Dashboard #v370PlanOverview{display:block!important}
+
+dialog.v374-theme-dialog{width:min(1120px,calc(100vw - 32px))!important;max-width:1120px!important;max-height:90vh!important}
+dialog.v374-theme-dialog.v35-theme-dialog .v35-form{display:grid!important;grid-template-columns:minmax(0,1.15fr) minmax(300px,.85fr)!important;gap:14px 18px!important;padding:18px 24px!important}
+dialog.v374-theme-dialog.v35-theme-dialog .v370-name{grid-column:1!important}
+dialog.v374-theme-dialog.v35-theme-dialog .v370-category{grid-column:2!important}
+dialog.v374-theme-dialog.v35-theme-dialog .v370-principle{grid-column:1!important}
+dialog.v374-theme-dialog.v35-theme-dialog .v370-deps{grid-column:2!important}
+dialog.v374-theme-dialog.v35-theme-dialog .v370-controls{grid-column:1/-1!important}
+dialog.v374-theme-dialog .v35-dialog-head{padding:20px 24px 14px!important}
+dialog.v374-theme-dialog .v35-actions{padding:14px 24px 18px!important}
+dialog.v374-theme-dialog .v35-questions{max-height:220px!important}
+
+@media(max-width:760px){
+  dialog.v374-theme-dialog{width:calc(100vw - 18px)!important;max-height:94vh!important}
+  dialog.v374-theme-dialog.v35-theme-dialog .v35-form{grid-template-columns:1fr!important;padding:14px 16px!important;gap:12px!important}
+  dialog.v374-theme-dialog.v35-theme-dialog .v370-name,
+  dialog.v374-theme-dialog.v35-theme-dialog .v370-category,
+  dialog.v374-theme-dialog.v35-theme-dialog .v370-principle,
+  dialog.v374-theme-dialog.v35-theme-dialog .v370-deps,
+  dialog.v374-theme-dialog.v35-theme-dialog .v370-controls{grid-column:1!important}
+  dialog.v374-theme-dialog .v35-dialog-head{padding:16px!important}
+  dialog.v374-theme-dialog .v35-actions{padding:12px 16px 16px!important}
+}
