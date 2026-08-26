@@ -7,52 +7,21 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="LOR" />
-  <meta name="lor-build" content="3.6.5" />
+  <meta name="lor-build" content="3.6.6" />
   <title>OpEx LOR – Lederoppfølgingsrunder</title>
-  <link rel="manifest" href="./manifest.webmanifest?v=3.6.5" />
-  <link rel="icon" href="./lor-icon.svg?v=3.6.5" type="image/svg+xml" />
-  <link rel="shortcut icon" href="./icons/lor-icon-192.png?v=3.6.5" type="image/png" />
-  <link rel="apple-touch-icon" href="./icons/lor-icon-192.png?v=3.6.5" />
-  <link rel="stylesheet" href="./src/styles/tokens.css?v=3.6.5" />
-  <link rel="stylesheet" href="./src/styles/base.css?v=3.6.5" />
-  <link rel="stylesheet" href="./src/styles/v3.css?v=3.6.5" />
-  <link rel="stylesheet" href="./src/styles/v31.css?v=3.6.5" />
-  <link rel="stylesheet" href="./src/styles/v33.css?v=3.6.5" />
-  <link rel="stylesheet" href="./src/styles/v34.css?v=3.6.5" />
-  <link rel="stylesheet" href="./src/styles/v35.css?v=3.6.5" />
-  <link rel="stylesheet" href="./src/styles/v36.css?v=3.6.5" />
-  <link rel="stylesheet" href="./src/styles/v363.css?v=3.6.5" />
-  <script>
-    (async()=>{
-      try{
-        const key='lor-pwa-reset-3.6.5';
-        if(sessionStorage.getItem(key)) return;
-        sessionStorage.setItem(key,'1');
-        let changed=false;
-        if('serviceWorker' in navigator){
-          const regs=await navigator.serviceWorker.getRegistrations();
-          for(const reg of regs){
-            if((reg.scope||'').includes('/lor-platform/')){
-              changed=(await reg.unregister())||changed;
-            }
-          }
-        }
-        if('caches' in window){
-          const keys=await caches.keys();
-          for(const name of keys){
-            if(/^lor-/i.test(name)){
-              changed=(await caches.delete(name))||changed;
-            }
-          }
-        }
-        if(changed){
-          const u=new URL(location.href);
-          u.searchParams.set('_lorBuild','365');
-          location.replace(u.toString());
-        }
-      }catch(err){console.warn('LOR cache reset',err)}
-    })();
-  </script>
+  <link rel="manifest" href="./manifest.webmanifest?v=3.6.6" />
+  <link rel="icon" href="./lor-icon.svg?v=3.6.6" type="image/svg+xml" />
+  <link rel="shortcut icon" href="./icons/lor-icon-192.png?v=3.6.6" type="image/png" />
+  <link rel="apple-touch-icon" href="./icons/lor-icon-192.png?v=3.6.6" />
+  <link rel="stylesheet" href="./src/styles/tokens.css?v=3.6.6" />
+  <link rel="stylesheet" href="./src/styles/base.css?v=3.6.6" />
+  <link rel="stylesheet" href="./src/styles/v3.css?v=3.6.6" />
+  <link rel="stylesheet" href="./src/styles/v31.css?v=3.6.6" />
+  <link rel="stylesheet" href="./src/styles/v33.css?v=3.6.6" />
+  <link rel="stylesheet" href="./src/styles/v34.css?v=3.6.6" />
+  <link rel="stylesheet" href="./src/styles/v35.css?v=3.6.6" />
+  <link rel="stylesheet" href="./src/styles/v36.css?v=3.6.6" />
+  <link rel="stylesheet" href="./src/styles/v363.css?v=3.6.6" />
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -60,12 +29,12 @@
 <body>
   <div id="app"></div>
   <div id="toast" class="toast" aria-live="polite"></div>
-  <script type="module" src="./src/app.js?v=3.6.5"></script>
-  <script type="module" src="./src/v31-runtime.js?v=3.6.5"></script>
-  <script type="module" src="./src/v33-runtime.js?v=3.6.5"></script>
-  <script type="module" src="./src/v34-runtime.js?v=3.6.5"></script>
-  <script type="module" src="./src/v35-runtime.js?v=3.6.5"></script>
-  <script type="module" src="./src/v363-runtime.js?v=3.6.5"></script>
-  <script type="module" src="./src/v363-guard.js?v=3.6.5"></script>
+  <script type="module" src="./src/app.js?v=3.6.6"></script>
+  <script type="module" src="./src/v31-runtime.js?v=3.6.6"></script>
+  <script type="module" src="./src/v33-runtime.js?v=3.6.6"></script>
+  <script type="module" src="./src/v34-runtime.js?v=3.6.6"></script>
+  <script type="module" src="./src/v35-runtime.js?v=3.6.6"></script>
+  <script type="module" src="./src/v363-runtime.js?v=3.6.6"></script>
+  <script type="module" src="./src/v363-guard.js?v=3.6.6"></script>
 </body>
 </html>
