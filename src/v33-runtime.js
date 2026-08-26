@@ -56,7 +56,11 @@ function donut(rate){const r=52,c=2*Math.PI*r,d=Math.max(0,Math.min(100,rate))/1
 function dashboardCharts(){
   const hero=document.querySelector('.dashboard-hero'),kpis=document.querySelector('.dashboard-kpis');
   if(!hero||!kpis)return;
-  let wrap=document.querySelector('#v33DashboardCharts');if(!wrap){wrap=document.createElement('section');wrap.id='v33DashboardCharts';wrap.className='v33-dashboard-charts';kpis.insertAdjacentElement('afterend',wrap);}
+  let wrap=document.querySelector('#v33DashboardCharts');
+  const sig=JSON.stringify([rounds.map(r=>[r.id,r.updatedAt,r.status]),plans.map(p=>[p.id,p.week,p.status])]);
+  if(wrap?.dataset.sig===sig)return;
+  if(!wrap){wrap=document.createElement('section');wrap.id='v33DashboardCharts';wrap.className='v33-dashboard-charts';kpis.insertAdjacentElement('afterend',wrap);}
+  wrap.dataset.sig=sig;
   const user=window.firebase?.auth?.().currentUser;const ownPlans=plans.filter(p=>!user||!p.leaderUid||p.leaderUid===user.uid);const ownRounds=rounds.filter(r=>!user||!r.leaderUid||r.leaderUid===user.uid);
   const donePlans=ownPlans.filter(p=>ownRounds.some(r=>r.planId===p.id||(r.planWeek&&Number(r.planWeek)===Number(p.week)&&r.theme===(p.theme||p.themeName)))).length;
   const rate=ownPlans.length?Math.round(donePlans/ownPlans.length*100):0;
