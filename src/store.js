@@ -1,7 +1,7 @@
 import { db, serverTimestamp } from './firebase.js';
 
 const rowsFrom = snap => { const rows=[]; snap.forEach(c=>rows.push({id:c.key,...(c.val()||{})})); return rows; };
-export function subscribePlannedRounds(uid,cb){const ref=db.ref('lor/plans'),h=s=>cb(rowsFrom(s).filter(x=>!uid||x.leaderUid===uid).sort((a,b)=>Number(a.week||99)-Number(b.week||99)));ref.on('value',h);return()=>ref.off('value',h)}
+export function subscribePlannedRounds(uid,cb){const ref=db.ref('lor/plans'),h=s=>cb(rowsFrom(s).filter(x=>!uid||!x.leaderUid||x.leaderUid===uid).sort((a,b)=>Number(a.week||99)-Number(b.week||99)));ref.on('value',h);return()=>ref.off('value',h)}
 export function subscribeRounds(cb){const ref=db.ref('lor/rounds'),h=s=>cb(rowsFrom(s).sort((a,b)=>Number(b.startedAt||b.completedAt||0)-Number(a.startedAt||a.completedAt||0)));ref.on('value',h);return()=>ref.off('value',h)}
 export function subscribeThemes(cb){const ref=db.ref('lor/themes'),h=s=>cb(rowsFrom(s).sort((a,b)=>(a.name||'').localeCompare(b.name||'')));ref.on('value',h);return()=>ref.off('value',h)}
 export async function createRound({planId=null,leader,department,theme,themeVersion=1,week=null,positiveStart=''}){const ref=db.ref('lor/rounds').push();await ref.set({planId,planWeek:week,source:planId?'plan':'manual',leaderUid:leader.uid,leaderName:leader.name,department,theme,themeVersion,positiveStart:String(positiveStart||'').trim(),status:'Pågår',startedAt:serverTimestamp(),createdAt:serverTimestamp(),updatedAt:serverTimestamp(),responses:{},employeeInterviews:{},observations:{},actions:{}});return ref.key}
