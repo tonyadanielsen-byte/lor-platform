@@ -1,0 +1,1 @@
+V3.3 recovery build: MutationObserver removed from enhancement runtime. Dashboard charts, Nortura branding, categorized temabank and dialog close handling now run via guarded periodic enhancement ticks to avoid DOM feedback loops.
