@@ -1,0 +1,77 @@
+/* V3.7.5 – hard lock for one dashboard annual-plan view and one theme-dialog layout. */
+
+/* The legacy V3.6.3 dashboard annual-plan renderer may still rerender after Firebase writes.
+   It must never be visible. V3.7.0 (#v370PlanOverview) is the only approved dashboard plan block. */
+#v363AnnualDash,
+#v35Dashboard #v363AnnualDash,
+.v35-dashboard #v363AnnualDash {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  max-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+}
+#v370PlanOverview {
+  display: block !important;
+  visibility: visible !important;
+}
+
+/* Theme dialog: style by the actual form, not by runtime-added helper classes.
+   This prevents the layout from changing depending on which renderer/class wins a race. */
+dialog:has(form[data-theme-form]) {
+  position: fixed !important;
+  inset: 50% auto auto 50% !important;
+  transform: translate(-50%, -50%) !important;
+  margin: 0 !important;
+  width: min(1120px, calc(100vw - 32px)) !important;
+  max-width: 1120px !important;
+  max-height: 90vh !important;
+  overflow: auto !important;
+  z-index: 11000 !important;
+}
+dialog:has(form[data-theme-form])::backdrop {
+  background: rgba(5, 20, 27, .42) !important;
+  backdrop-filter: blur(3px);
+}
+
+dialog:has(form[data-theme-form]) .v35-form {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1.15fr) minmax(300px, .85fr) !important;
+  gap: 14px 18px !important;
+  padding: 18px 24px !important;
+  align-items: start !important;
+}
+/* Lock the approved desktop/tablet placement without relying on v370-* classes. */
+dialog:has(form[data-theme-form]) .v35-form > :nth-child(1) { grid-column: 1 !important; grid-row: 1 !important; }
+dialog:has(form[data-theme-form]) .v35-form > :nth-child(2) { grid-column: 2 !important; grid-row: 1 !important; }
+dialog:has(form[data-theme-form]) .v35-form > :nth-child(3) { grid-column: 1 !important; grid-row: 2 !important; }
+dialog:has(form[data-theme-form]) .v35-form > :nth-child(4) { grid-column: 2 !important; grid-row: 2 !important; }
+dialog:has(form[data-theme-form]) .v35-form > :nth-child(5) { grid-column: 1 / -1 !important; grid-row: 3 !important; }
+
+dialog:has(form[data-theme-form]) .v35-dialog-head { padding: 20px 24px 14px !important; }
+dialog:has(form[data-theme-form]) .v35-actions { padding: 14px 24px 18px !important; }
+dialog:has(form[data-theme-form]) .v35-questions { max-height: 220px !important; }
+
+/* Only actual mobile changes to a stacked layout. Tablet keeps the approved two-column form. */
+@media (max-width: 699px) {
+  dialog:has(form[data-theme-form]) {
+    width: calc(100vw - 18px) !important;
+    max-height: 94vh !important;
+  }
+  dialog:has(form[data-theme-form]) .v35-form {
+    grid-template-columns: 1fr !important;
+    padding: 14px 16px !important;
+    gap: 12px !important;
+  }
+  dialog:has(form[data-theme-form]) .v35-form > :nth-child(n) {
+    grid-column: 1 !important;
+    grid-row: auto !important;
+  }
+  dialog:has(form[data-theme-form]) .v35-dialog-head { padding: 16px !important; }
+  dialog:has(form[data-theme-form]) .v35-actions { padding: 12px 16px 16px !important; }
+}
