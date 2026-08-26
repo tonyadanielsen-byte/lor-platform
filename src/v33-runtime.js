@@ -1,13 +1,12 @@
 const NORTURA_LOGO='https://raw.githubusercontent.com/tonyadanielsen-byte/opex-platform/main/icons/nortura-logo.png';
-let rounds=[],plans=[],dbBound=false;
+let rounds=[],plans=[],dbBound=false,lastTick='';
 const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 
 function applyBrand(){
   document.querySelectorAll('.brand-logo,.login-opex-logo').forEach(img=>{
-    if(img.src!==NORTURA_LOGO){img.src=NORTURA_LOGO;img.alt='Nortura';}
-    img.classList.add('nortura-logo-v33');
+    if(img.getAttribute('src')!==NORTURA_LOGO){img.setAttribute('src',NORTURA_LOGO);img.alt='Nortura';}
+    if(!img.classList.contains('nortura-logo-v33'))img.classList.add('nortura-logo-v33');
   });
-  document.querySelectorAll('.brand strong').forEach(el=>el.textContent='OpEx · LOR');
 }
 
 function categoryFor(name=''){
@@ -54,8 +53,8 @@ function lineSvg(valsA,valsB,labels){
 function donut(rate){const r=52,c=2*Math.PI*r,d=Math.max(0,Math.min(100,rate))/100*c;return `<svg class="v33-donut" viewBox="0 0 140 140"><circle cx="70" cy="70" r="52" class="track"/><circle cx="70" cy="70" r="52" class="value" stroke-dasharray="${d} ${c-d}"/><text x="70" y="66" text-anchor="middle" class="pct">${rate}%</text><text x="70" y="87" text-anchor="middle" class="sub">gjennomført</text></svg>`;}
 
 function dashboardCharts(){
-  const hero=document.querySelector('.dashboard-hero'),kpis=document.querySelector('.dashboard-kpis');
-  if(!hero||!kpis)return;
+  const kpis=document.querySelector('.dashboard-kpis');
+  if(!kpis)return;
   let wrap=document.querySelector('#v33DashboardCharts');
   const sig=JSON.stringify([rounds.map(r=>[r.id,r.updatedAt,r.status]),plans.map(p=>[p.id,p.week,p.status])]);
   if(wrap?.dataset.sig===sig)return;
@@ -66,9 +65,7 @@ function dashboardCharts(){
   const rate=ownPlans.length?Math.round(donePlans/ownPlans.length*100):0;
   const months=lastMonths(),imp=[],dev=[];months.forEach(m=>{const rs=rounds.filter(r=>monthKey(r.completedAt||r.startedAt)===m.key),fs=rs.flatMap(findingsOf);imp.push(fs.filter(x=>x==='Forbedringspunkt').length);dev.push(fs.filter(x=>x==='Avvik').length);});
   const themeCounts={};rounds.forEach(r=>{const n=findingsOf(r).length;if(n)themeCounts[r.theme||'Ukjent']=(themeCounts[r.theme||'Ukjent']||0)+n;});const top=Object.entries(themeCounts).sort((a,b)=>b[1]-a[1]).slice(0,5),mx=Math.max(1,...top.map(x=>x[1]));
-  wrap.innerHTML=`<article class="card v33-chart-card v33-plan-card"><div class="v33-card-head"><div><span class="eyebrow">Fremdrift</span><h3>Planlagte runder</h3></div><span class="v33-chip">${donePlans}/${ownPlans.length||0}</span></div><div class="v33-plan-body">${donut(rate)}<div><strong>${ownPlans.length-donePlans} gjenstår</strong><p>Planstatus for innlogget leder. Klikk KPI-en over for full historikk.</p></div></div></article>
-  <article class="card v33-chart-card"><div class="v33-card-head"><div><span class="eyebrow">Utvikling</span><h3>Funn over tid</h3></div><span class="v33-legend"><i class="imp"></i>Forbedring <i class="dev"></i>Avvik</span></div>${lineSvg(imp,dev,months.map(m=>m.label))}</article>
-  <article class="card v33-chart-card"><div class="v33-card-head"><div><span class="eyebrow">Fokus</span><h3>Funn per tema</h3></div></div><div class="v33-bars">${top.length?top.map(([n,c])=>`<button data-view="findings"><span>${esc(n)}</span><i><b style="width:${c/mx*100}%"></b></i><strong>${c}</strong></button>`).join(''):'<div class="v33-empty">Mer data trengs før vi kan vise mønster.</div>'}</div></article>`;
+  wrap.innerHTML=`<article class="card v33-chart-card v33-plan-card"><div class="v33-card-head"><div><span class="eyebrow">Fremdrift</span><h3>Planlagte runder</h3></div><span class="v33-chip">${donePlans}/${ownPlans.length||0}</span></div><div class="v33-plan-body">${donut(rate)}<div><strong>${ownPlans.length-donePlans} gjenstår</strong><p>Planstatus for innlogget leder.</p></div></div></article><article class="card v33-chart-card"><div class="v33-card-head"><div><span class="eyebrow">Utvikling</span><h3>Funn over tid</h3></div><span class="v33-legend"><i class="imp"></i>Forbedring <i class="dev"></i>Avvik</span></div>${lineSvg(imp,dev,months.map(m=>m.label))}</article><article class="card v33-chart-card"><div class="v33-card-head"><div><span class="eyebrow">Fokus</span><h3>Funn per tema</h3></div></div><div class="v33-bars">${top.length?top.map(([n,c])=>`<button data-view="findings"><span>${esc(n)}</span><i><b style="width:${c/mx*100}%"></b></i><strong>${c}</strong></button>`).join(''):'<div class="v33-empty">Mer data trengs før vi kan vise mønster.</div>'}</div></article>`;
 }
 
 function bindDb(){if(dbBound||!window.firebase?.database)return;dbBound=true;const db=window.firebase.database();db.ref('lor/rounds').on('value',s=>{rounds=[];s.forEach(c=>rounds.push({id:c.key,...(c.val()||{})}));dashboardCharts();});db.ref('lor/plans').on('value',s=>{plans=[];s.forEach(c=>plans.push({id:c.key,...(c.val()||{})}));dashboardCharts();});}
@@ -80,6 +77,15 @@ document.addEventListener('click',e=>{
 },true);
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelectorAll('dialog').forEach(d=>d.remove());}},true);
 
-const observer=new MutationObserver(()=>{applyBrand();enhanceThemeBank();dashboardCharts();});observer.observe(document.documentElement,{childList:true,subtree:true});
-window.addEventListener('load',()=>{applyBrand();enhanceThemeBank();bindDb();dashboardCharts();});
-setTimeout(()=>{applyBrand();enhanceThemeBank();bindDb();dashboardCharts();},300);
+function safeTick(){
+  try{
+    applyBrand();enhanceThemeBank();bindDb();dashboardCharts();
+    lastTick='ok';
+  }catch(err){
+    if(lastTick!=='error')console.error('V3.3 enhancement error',err);
+    lastTick='error';
+  }
+}
+window.addEventListener('load',safeTick);
+setTimeout(safeTick,250);
+setInterval(safeTick,1200);
