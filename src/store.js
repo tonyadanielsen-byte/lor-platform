@@ -13,7 +13,7 @@ export async function saveTheme(theme){const id=theme.id||db.ref('lor/themes').p
 export async function deleteTheme(id){return db.ref(`lor/themes/${id}`).update({active:false,updatedAt:serverTimestamp()})}
 function isoDate(d=new Date()){return d.toISOString().slice(0,10)}
 function defaultDueDate(){const d=new Date();d.setDate(d.getDate()+14);return isoDate(d)}
-export async function createMasterAction({round,finding,user,title,description,owner='',dueDate='',priority='Middels'}){
+export async function createMasterAction({round,finding,findingId='',user,title,description,owner='',dueDate='',priority='Middels'}){
   const ref=db.ref('tiltak').push();
   const payload={
     tittel:String(title||finding||'LOR-tiltak').trim(),
@@ -37,13 +37,14 @@ export async function createMasterAction({round,finding,user,title,description,o
     sourceTheme:round.theme,
     sourceDepartment:round.department,
     sourceFinding:finding||'',
+    sourceFindingId:findingId||'',
     sourceLeader:round.leaderName||'',
     createdByUid:user.uid,
     createdAt:serverTimestamp(),
     updatedAt:serverTimestamp()
   };
-  await ref.set(payload);
-  await db.ref(`lor/rounds/${round.id}/actions/${ref.key}`).set({masterTaskId:ref.key,title:payload.tittel,status:'Opprettet',createdAt:serverTimestamp()});
+  const archive={masterTaskId:ref.key,sourceFindingId:findingId||'',sourceFinding:finding||'',title:payload.tittel,status:'Sendt til Master',archivedInLor:true,archivedAt:serverTimestamp(),archivedBy:user.name||'',archivedByUid:user.uid||'',createdAt:serverTimestamp()};
+  await db.ref().update({[`tiltak/${ref.key}`]:payload,[`lor/rounds/${round.id}/actions/${ref.key}`]:archive,[`lor/rounds/${round.id}/updatedAt`]:serverTimestamp()});
   return ref.key;
 }
 export async function addComment(type,id,user,text){return db.ref(`lor/comments/${type}/${id}`).push().set({text:String(text||'').trim(),authorUid:user.uid,authorName:user.name,createdAt:serverTimestamp()})}
