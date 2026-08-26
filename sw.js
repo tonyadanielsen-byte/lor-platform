@@ -1,5 +1,5 @@
-const CACHE_NAME='lor-v3-2';
-const APP_SHELL=['./','./index.html','./manifest.webmanifest','./lor-icon.svg','./assets/opex-hub-logo.png','./src/app.js','./src/auth.js','./src/firebase.js','./src/store.js','./src/round-flow.js','./src/seed-data.js','./src/v3-core.js','./src/v31-runtime.js','./src/styles/tokens.css','./src/styles/base.css','./src/styles/v3.css','./src/styles/v31.css'];
+const CACHE_NAME='lor-v3-3';
+const APP_SHELL=['./','./index.html','./manifest.webmanifest','./lor-icon.svg','./icons/lor-icon-192.png','./src/app.js','./src/auth.js','./src/firebase.js','./src/store.js','./src/round-flow.js','./src/seed-data.js','./src/v3-core.js','./src/v31-runtime.js','./src/v33-runtime.js','./src/styles/tokens.css','./src/styles/base.css','./src/styles/v3.css','./src/styles/v31.css','./src/styles/v33.css'];
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE_NAME).then(cache=>cache.addAll(APP_SHELL)));self.skipWaiting()});
 self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE_NAME).map(key=>caches.delete(key)))));self.clients.claim()});
 self.addEventListener('fetch',event=>{if(event.request.method!=='GET')return;event.respondWith(fetch(event.request).then(response=>{if(response&&response.ok){const copy=response.clone();caches.open(CACHE_NAME).then(cache=>cache.put(event.request,copy))}return response}).catch(()=>caches.match(event.request).then(hit=>hit||caches.match('./index.html'))))});
