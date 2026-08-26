@@ -1,4 +1,4 @@
-const CACHE_NAME='lor-v3-5';
+const CACHE_NAME='lor-v3-5-2';
 const APP_SHELL=['./','./index.html','./manifest.webmanifest','./lor-icon.svg','./icons/lor-icon-192.png','./src/app.js','./src/auth.js','./src/firebase.js','./src/store.js','./src/round-flow.js','./src/seed-data.js','./src/v3-core.js','./src/v31-runtime.js','./src/v33-runtime.js','./src/v34-runtime.js','./src/v35-runtime.js','./src/styles/tokens.css','./src/styles/base.css','./src/styles/v3.css','./src/styles/v31.css','./src/styles/v33.css','./src/styles/v34.css','./src/styles/v35.css'];
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE_NAME).then(cache=>cache.addAll(APP_SHELL)));self.skipWaiting()});
 self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE_NAME).map(key=>caches.delete(key)))));self.clients.claim()});
