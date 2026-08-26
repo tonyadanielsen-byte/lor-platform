@@ -1,3 +1,3 @@
 const enhanced=new Set(['dashboard','themes','analytics']);
-document.addEventListener('click',ev=>{const nav=ev.target.closest('.nav [data-view]');if(!nav)return;if(!enhanced.has(nav.dataset.view))setTimeout(()=>document.body.classList.remove('v363-view-loading'),0);},true);
+document.addEventListener('click',ev=>{const target=ev.target.closest('[data-view]');if(!target)return;if(enhanced.has(target.dataset.view))document.body.classList.add('v363-view-loading');else setTimeout(()=>document.body.classList.remove('v363-view-loading'),0);},true);
 const app=document.querySelector('#app');if(app)new MutationObserver(()=>{const main=document.querySelector('main.main');if(!main)return;const active=document.querySelector('.nav [data-view].active')?.dataset.view;if(active&&!enhanced.has(active))document.body.classList.remove('v363-view-loading');}).observe(app,{childList:true,subtree:false});
