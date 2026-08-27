@@ -4,7 +4,7 @@
   "short_name": "LOR",
   "description": "Digital lederoppfølging for Nortura Sarpsborg.",
   "lang": "nb-NO",
-  "start_url": "/lor-platform/?app=382",
+  "start_url": "/lor-platform/?app=383",
   "scope": "/lor-platform/",
   "display": "standalone",
   "orientation": "any",
