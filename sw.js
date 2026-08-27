@@ -1,4 +1,4 @@
-const CACHE_NAME = 'lor-shell-v3.8.8';
+const CACHE_NAME = 'lor-shell-v3.8.9';
 const APP_SHELL = [
   './',
   './index.html',
@@ -7,6 +7,10 @@ const APP_SHELL = [
   './icons/lor-icon-512.png'
 ];
 const LOR_SCOPE = self.registration.scope;
+
+self.addEventListener('message', event => {
+  if (event.data?.type === 'SKIP_WAITING') self.skipWaiting();
+});
 
 self.addEventListener('install', event => {
   event.waitUntil(
@@ -24,28 +28,45 @@ self.addEventListener('activate', event => {
   );
 });
 
+function networkFirst(request, fallbackKey = null) {
+  return fetch(request, { cache: 'no-store' })
+    .then(response => {
+      if (response && response.ok) {
+        const copy = response.clone();
+        caches.open(CACHE_NAME).then(cache => cache.put(request, copy));
+      }
+      return response;
+    })
+    .catch(async () => {
+      const cached = await caches.match(request);
+      if (cached) return cached;
+      if (fallbackKey) return caches.match(fallbackKey);
+      throw new Error('Offline and no cached response');
+    });
+}
+
 self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
   const url = new URL(event.request.url);
   if (url.origin !== self.location.origin) return;
 
   if (event.request.mode === 'navigate') {
-    event.respondWith(
-      fetch(event.request)
-        .then(response => {
-          const copy = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put('./index.html', copy));
-          return response;
-        })
-        .catch(() => caches.match('./index.html'))
-    );
+    event.respondWith(networkFirst(event.request, './index.html'));
+    return;
+  }
+
+  const freshAsset = /\.(?:js|mjs|css|json|webmanifest)$/i.test(url.pathname);
+  if (freshAsset) {
+    event.respondWith(networkFirst(event.request));
     return;
   }
 
   event.respondWith(
     caches.match(event.request).then(cached => cached || fetch(event.request).then(response => {
-      const copy = response.clone();
-      caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
+      if (response && response.ok) {
+        const copy = response.clone();
+        caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
+      }
       return response;
     }))
   );
