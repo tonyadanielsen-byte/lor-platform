@@ -9,12 +9,12 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="LOR" />
   <meta name="application-name" content="LOR" />
-  <meta name="lor-build" content="3.8.7" />
+  <meta name="lor-build" content="3.8.8" />
   <title>OpEx LOR – Lederoppfølgingsrunder</title>
-  <link rel="manifest" href="./manifest.webmanifest?v=3.8.7" />
-  <link rel="icon" href="./icons/lor-icon-192.png" type="image/png" />
-  <link rel="shortcut icon" href="./icons/lor-icon-192.png" type="image/png" />
-  <link rel="apple-touch-icon" sizes="192x192" href="./icons/lor-icon-192.png" />
+  <link rel="manifest" href="./manifest.webmanifest?v=3.8.8" />
+  <link rel="icon" href="./icons/lor-icon-192.png?v=3.8.8" type="image/png" />
+  <link rel="shortcut icon" href="./icons/lor-icon-192.png?v=3.8.8" type="image/png" />
+  <link rel="apple-touch-icon" sizes="192x192" href="./icons/lor-icon-192.png?v=3.8.8" />
   <link rel="stylesheet" href="./src/styles/tokens.css?v=3.8.4" />
   <link rel="stylesheet" href="./src/styles/base.css?v=3.8.4" />
   <link rel="stylesheet" href="./src/styles/v3.css?v=3.8.4" />
@@ -48,7 +48,16 @@
   <script type="module" src="./src/v371-runtime.js?v=3.8.4"></script>
   <script type="module" src="./src/v363-guard.js?v=3.8.4"></script>
   <script type="module" src="./src/v374-hotfix.js?v=3.8.4"></script>
-  <script type="module" src="./src/push-v1.js?v=3.8.4"></script>
-  <script type="module" src="./src/pwa-install.js?v=3.8.7"></script>
+  <script type="module" src="./src/push-v1.js?v=3.8.8"></script>
+  <script type="module" src="./src/pwa-install.js?v=3.8.8"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js?v=388', { scope: './' })
+          .then(registration => registration.update().catch(() => {}))
+          .catch(error => console.warn('[LOR PWA] Service worker registration failed', error));
+      });
+    }
+  </script>
 </body>
 </html>
