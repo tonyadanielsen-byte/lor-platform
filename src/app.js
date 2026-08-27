@@ -2,7 +2,7 @@ import { onAuth, signIn, signOut, sendPasswordReset } from './auth.js';
 import { subscribePlannedRounds, subscribeRounds, subscribeThemes } from './store.js';
 import { createRoundController } from './round-flow.js';
 import { loadSeedData } from './seed-data.js';
-import { roundsView,roundDetail,findingsView,themeAdmin,editRoundDialog,themeDialog,saveRoundEdit,saveThemeForm,deleteTheme,createMasterAction,findings } from './v3-core.js';
+import { roundsView,roundDetail,findingsView,themeAdmin,editRoundDialog,themeDialog,saveRoundEdit,saveThemeForm,deleteTheme,createMasterAction,findings } from './v3-core.js?v=3.8.6';
 const app=document.querySelector('#app'),toastEl=document.querySelector('#toast');
 const state={activeView:'dashboard',user:null,authReady:false,authError:'',plans:[],livePlans:[],rounds:[],liveRounds:[],themes:[],roundController:null,unsubscribers:[],seedReady:false,seedPlan:null,themeBank:null,legacyHistory:[],roundFilters:{period:'all'},findingType:'',selectedRound:null,pendingPlan:null};
 const views=[['dashboard','Dashboard'],['rounds','Historikk'],['findings','Funn & oppfølging'],['themes','Temabank'],['analytics','Analyse']];
