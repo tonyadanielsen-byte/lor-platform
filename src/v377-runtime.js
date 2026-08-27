@@ -177,7 +177,7 @@ async function atomicAfterRegister(form) {
     completedRoundId: roundId,
     updatedAt: now
   };
-  if (!existingPlanId && seedId) plan.sourceSeedId = seedId;
+  if (seedId) plan.sourceSeedId = seedId;
 
   const round = {
     planId,
