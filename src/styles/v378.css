@@ -1,0 +1,34 @@
+/* V3.7.8 – verified after-registration + overdue-state correction */
+.v370-annual-plan .v36-row.overdue,
+.v370-annual-plan .v36-row.overdue.v378-overdue {
+  background:#fff2f2!important;
+  border-left:4px solid #db4040!important;
+}
+.v370-annual-plan .v36-row.overdue:hover,
+.v370-annual-plan .v36-row.overdue.v378-overdue:hover {
+  background:#ffeaea!important;
+}
+.v370-annual-plan .v36-row.done {
+  background:#f7fcf9!important;
+  border-left:4px solid #35a16e!important;
+}
+.v370-annual-plan .v36-row.late {
+  background:#fffaf0!important;
+  border-left:4px solid #e69b27!important;
+}
+.v377-annual-dialog [data-v378-afterregister],
+.v363-dialog [data-v378-afterregister] {
+  border:1px solid #9fd7bf!important;
+  background:#e9f7f0!important;
+  color:#0b6f4e!important;
+  font-weight:800!important;
+}
+.v377-annual-dialog [data-v378-afterregister]:hover,
+.v363-dialog [data-v378-afterregister]:hover {
+  background:#daf1e6!important;
+}
+.v377-annual-dialog [data-v378-afterregister]:disabled,
+.v363-dialog [data-v378-afterregister]:disabled {
+  opacity:.68;
+  cursor:wait;
+}
