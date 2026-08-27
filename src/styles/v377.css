@@ -1,0 +1,108 @@
+/* V3.7.7 – team feedback polish */
+
+#v35Dashboard .v35-head > button[data-view].v377-inline-link,
+#v35Dashboard .v35-head > button[data-view] {
+  appearance:none;
+  border:1px solid #cfe7dc;
+  background:#edf8f3;
+  color:#0b7251;
+  border-radius:999px;
+  padding:7px 13px;
+  min-height:34px;
+  font:700 13px/1.1 inherit;
+  box-shadow:none;
+  cursor:pointer;
+  transition:background .16s ease,border-color .16s ease,transform .16s ease;
+}
+#v35Dashboard .v35-head > button[data-view]:hover {
+  background:#def3e9;
+  border-color:#aadbc6;
+  transform:translateY(-1px);
+}
+#v35Dashboard .v35-head > button[data-view]:focus-visible {
+  outline:3px solid rgba(21,154,104,.20);
+  outline-offset:2px;
+}
+
+.v377-annual-dialog .v36-form label:has(input[name="coLeaderName"]) {
+  align-self:start;
+}
+.v377-annual-dialog input[name="coLeaderName"] {
+  width:100%;
+}
+.v377-participant-memory {
+  display:block;
+  margin-top:9px;
+}
+.v377-participant-memory > small {
+  display:block;
+  margin-bottom:6px;
+  color:#6f8296;
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:.03em;
+  text-transform:uppercase;
+}
+.v377-participant-memory > div {
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+}
+.v377-person-chip {
+  display:inline-flex;
+  align-items:center;
+  border:1px solid #d6e5df;
+  border-radius:999px;
+  background:#f7fbf9;
+  overflow:hidden;
+}
+.v377-person-chip button {
+  appearance:none;
+  border:0;
+  background:transparent;
+  color:#36546a;
+  cursor:pointer;
+  font:700 12px/1 inherit;
+  padding:7px 8px 7px 10px;
+}
+.v377-person-chip button:last-child {
+  color:#8b4d4d;
+  padding-left:4px;
+  padding-right:9px;
+  font-size:15px;
+}
+.v377-person-chip:hover {
+  border-color:#acd6c4;
+  background:#edf8f3;
+}
+.v377-memory-empty {
+  color:#8292a3;
+  font-size:12px;
+  font-weight:500;
+}
+
+.v377-annual-dialog [data-v377-afterregister] {
+  border-color:#bedfce;
+  color:#0b6f4e;
+  background:#eef8f3;
+}
+.v377-annual-dialog [data-v377-afterregister]:hover {
+  background:#def3e9;
+}
+.v377-annual-dialog [data-v377-afterregister]:disabled {
+  opacity:.65;
+  cursor:wait;
+}
+
+@media (max-width:760px) {
+  #v35Dashboard .v35-head > button[data-view] {
+    padding:6px 10px;
+    min-height:32px;
+    font-size:12px;
+  }
+  .v377-participant-memory > div {
+    max-height:112px;
+    overflow:auto;
+    padding-right:3px;
+  }
+}
