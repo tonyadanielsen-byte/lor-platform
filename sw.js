@@ -46,8 +46,8 @@ try {
     const link = data.link || LOR_SCOPE;
     return self.registration.showNotification(title, {
       body,
-      icon:'./lor-icon.svg?v=3.7.8',
-      badge:'./lor-icon.svg?v=3.7.8',
+      icon:'./lor-shield-v379.svg',
+      badge:'./lor-shield-v379.svg',
       tag:data.tag || 'lor-notification',
       renotify:false,
       data:{ link, planId:data.planId || '', eventType:data.eventType || '' }
