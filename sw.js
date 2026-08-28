@@ -1,4 +1,4 @@
-const CACHE_NAME = 'lor-shell-v3.8.10';
+const CACHE_NAME = 'lor-shell-v3.8.11';
 const APP_SHELL = [
   './',
   './index.html',
