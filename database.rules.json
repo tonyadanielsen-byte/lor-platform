@@ -5,14 +5,19 @@
       ".write": "auth != null",
       "rounds": {
         "$roundId": {
-          ".validate": "newData.hasChildren(['leaderUid','leaderName','department','theme','status'])"
+          ".validate": "!newData.exists() || (newData.hasChildren(['leaderUid','leaderName','department','theme','status','dataModelVersion']) && newData.child('dataModelVersion').val() == 4)"
+        }
+      },
+      "plans": {
+        "$planId": {
+          ".validate": "!newData.exists() || newData.child('dataModelVersion').val() == 4"
         }
       },
       "comments": {
         "$objectType": {
           "$objectId": {
             "$commentId": {
-              ".validate": "newData.hasChildren(['text','authorUid','authorName','createdAt'])"
+              ".validate": "!newData.exists() || newData.hasChildren(['text','authorUid','authorName','createdAt'])"
             }
           }
         }
