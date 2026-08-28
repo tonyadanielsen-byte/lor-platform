@@ -20,11 +20,9 @@ function normalizeTheme(theme) {
 }
 
 export async function loadSeedData() {
-  const [themeBank, plan2026, history2025, history2026] = await Promise.all([
+  const [themeBank, plan2026] = await Promise.all([
     loadJson('./data/seed/themes-v1.json'),
     loadJson('./data/seed/plan-2026.json'),
-    loadJson('./data/seed/history-2025.json'),
-    loadJson('./data/seed/history-2026.json'),
   ]);
 
   const sharedThemes = (themeBank.sharedThemes || []).map(normalizeTheme);
@@ -33,7 +31,7 @@ export async function loadSeedData() {
   return {
     themeBank: { ...themeBank, sharedThemes, departmentThemes },
     plan2026,
-    legacyHistory: [...(history2025.records || []), ...(history2026.records || [])],
+    legacyHistory: [],
   };
 }
 
