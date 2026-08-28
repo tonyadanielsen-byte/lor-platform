@@ -1,0 +1,70 @@
+/* LOR V4 – clean presentation layer. Loaded last and intentionally independent of V3 runtime CSS. */
+
+main.main > .dashboard-hero,
+main.main > .dashboard-kpis,
+main.main > .dashboard-grid {
+  visibility: visible !important;
+  position: relative !important;
+  pointer-events: auto !important;
+  inset: auto !important;
+  width: auto !important;
+  height: auto !important;
+  overflow: visible !important;
+}
+
+.main {
+  width: min(1480px, calc(100% - 40px));
+  margin: 0 auto;
+  padding: 28px 0 48px;
+}
+
+.dashboard-hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 18px;
+}
+
+.dashboard-kpis {
+  margin-bottom: 18px;
+}
+
+.dashboard-grid {
+  align-items: stretch;
+}
+
+.dashboard-grid > .panel {
+  min-height: 280px;
+}
+
+.v36-head,
+.v36-row {
+  grid-template-columns: 88px minmax(150px,1fr) minmax(220px,1.4fr) minmax(130px,.9fr) 150px 36px !important;
+}
+
+body.v363-view-loading main.main > * {
+  visibility: visible !important;
+}
+
+@media (max-width: 900px) {
+  .main {
+    width: min(100% - 24px, 1480px);
+    padding-top: 18px;
+  }
+  .dashboard-hero {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .v36-head {
+    display: none !important;
+  }
+  .v36-row {
+    grid-template-columns: 1fr auto !important;
+    gap: 8px 12px;
+  }
+  .v36-row > span,
+  .v36-row > em {
+    grid-column: 1 / -1;
+  }
+}
