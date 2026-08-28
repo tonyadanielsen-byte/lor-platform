@@ -1,5 +1,5 @@
 (() => {
-  const BUILD = '3.8.11';
+  const BUILD = '3.8.12';
 
   function isoWeekFromDate(value) {
     if (!value) return null;
@@ -17,7 +17,6 @@
     const weekInput = form.querySelector('input[name="week"]');
     const dateInput = form.querySelector('input[name="plannedDate"]');
     if (!weekInput || !dateInput) return;
-
     const week = Number(weekInput.value);
     const dateWeek = isoWeekFromDate(dateInput.value);
     if (Number.isFinite(week) && dateInput.value && dateWeek && dateWeek !== week) {
@@ -26,12 +25,8 @@
     }
   }
 
-  // Registreres synkront før årsplanmotoren. Dermed blir uke-feltet korrigert
-  // før v384-plan-engine får lese skjemaet og skrive til Firebase.
   document.addEventListener('input', event => {
-    if (event.target?.matches?.('input[name="week"]')) {
-      normalizeForm(event.target.closest('[data-v384-form]'));
-    }
+    if (event.target?.matches?.('input[name="week"]')) normalizeForm(event.target.closest('[data-v384-form]'));
   }, true);
 
   document.addEventListener('change', event => {
@@ -47,9 +42,6 @@
     if (action) normalizeForm(action.closest('[data-v384-form]'));
   }, true);
 
-  document.addEventListener('submit', event => {
-    normalizeForm(event.target);
-  }, true);
-
+  document.addEventListener('submit', event => normalizeForm(event.target), true);
   window.__lorWeekPreflight = { build: BUILD, normalizeForm };
 })();
