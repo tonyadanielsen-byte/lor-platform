@@ -1,4 +1,4 @@
-const CACHE_NAME = 'lor-shell-v3.8.14';
+const CACHE_NAME = 'lor-shell-v4.0.0';
 const APP_SHELL = [
   './',
   './index.html',
@@ -8,16 +8,8 @@ const APP_SHELL = [
 ];
 const LOR_SCOPE = self.registration.scope;
 
-self.addEventListener('message', event => {
-  if (event.data?.type === 'SKIP_WAITING') self.skipWaiting();
-});
-
 self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(APP_SHELL))
-      .then(() => self.skipWaiting())
-  );
+  event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)).then(() => self.skipWaiting()));
 });
 
 self.addEventListener('activate', event => {
@@ -49,27 +41,15 @@ self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
   const url = new URL(event.request.url);
   if (url.origin !== self.location.origin) return;
-
   if (event.request.mode === 'navigate') {
     event.respondWith(networkFirst(event.request, './index.html'));
     return;
   }
-
-  const freshAsset = /\.(?:js|mjs|css|json|webmanifest)$/i.test(url.pathname);
-  if (freshAsset) {
+  if (/\.(?:js|mjs|css|json|webmanifest)$/i.test(url.pathname)) {
     event.respondWith(networkFirst(event.request));
     return;
   }
-
-  event.respondWith(
-    caches.match(event.request).then(cached => cached || fetch(event.request).then(response => {
-      if (response && response.ok) {
-        const copy = response.clone();
-        caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
-      }
-      return response;
-    }))
-  );
+  event.respondWith(caches.match(event.request).then(cached => cached || fetch(event.request)));
 });
 
 self.addEventListener('notificationclick', event => {
@@ -105,16 +85,12 @@ try {
   messaging.onBackgroundMessage(payload => {
     if (payload?.notification?.title || payload?.notification?.body) return;
     const data = payload?.data || {};
-    const title = data.title || 'OpEx · LOR';
-    const body = data.body || 'Du har et nytt LOR-varsel.';
-    const link = data.link || LOR_SCOPE;
-    return self.registration.showNotification(title, {
-      body,
+    return self.registration.showNotification(data.title || 'OpEx · LOR', {
+      body: data.body || 'Du har et nytt LOR-varsel.',
       icon:'./icons/lor-icon-192.png',
       badge:'./icons/lor-icon-192.png',
       tag:data.tag || 'lor-notification',
-      renotify:false,
-      data:{ link, planId:data.planId || '', eventType:data.eventType || '' }
+      data:{ link:data.link || LOR_SCOPE, planId:data.planId || '', eventType:data.eventType || '' }
     });
   });
 } catch (error) {
