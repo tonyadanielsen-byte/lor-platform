@@ -205,8 +205,20 @@ function formValues(form){
   return {year:activeYear,week:plannedDate?(weekFromDate(plannedDate)||rawWeek):rawWeek,plannedDate,leaderName:String(fd.get('leaderName')||'').trim(),theme:String(fd.get('theme')||'').trim(),department:String(fd.get('department')||'').trim(),coLeaderName:String(fd.get('coLeaderName')||'').trim(),completedDate:String(fd.get('completedDate')||'').trim()};
 }
 function seedGroup(seedId){return seedId?livePlans.filter(p=>String(p.sourceSeedId||'')===String(seedId)):[];}
-async function resolvePlan(form){
-  const direct=String(form.dataset.id||'').trim(),seedId=String(form.dataset.seedId||'').trim();
+function seedIdentityFor(form,v){
+  const seeds=seedRows(v.year),currentId=String(form.dataset.seedId||'').trim();
+  const current=seeds.find(seed=>String(seed.id)===currentId);
+  if(current&&Number(current.week)===Number(v.week))return current.id;
+  const candidates=seeds.filter(seed=>
+    Number(seed.week)===Number(v.week) &&
+    (!seed.leaderName||!v.leaderName||first(seed.leaderName)===first(v.leaderName)) &&
+    (!seed.theme||!v.theme||norm(seed.theme)===norm(v.theme)) &&
+    (!seed.department||!v.department||norm(seed.department)===norm(v.department))
+  );
+  return candidates.length===1?candidates[0].id:'';
+}
+async function resolvePlan(form,v){
+  const direct=String(form.dataset.id||'').trim(),seedId=seedIdentityFor(form,v);
   if(direct)return {id:direct,seedId};
   const group=seedGroup(seedId).sort((a,b)=>stamp(b)-stamp(a)||String(b.id).localeCompare(String(a.id)));
   if(group[0])return {id:group[0].id,seedId};
@@ -223,12 +235,20 @@ async function rememberParticipant(name){
 }
 async function savePlan(form){
   if(!form.reportValidity())throw new Error('Fyll ut obligatoriske felt først.');
-  const v=formValues(form),resolved=await resolvePlan(form),existing=livePlans.find(p=>String(p.id)===String(resolved.id))||{},completed=groupCompletion(resolved.seedId,resolved.id);
+  const v=formValues(form),resolved=await resolvePlan(form,v),existing=livePlans.find(p=>String(p.id)===String(resolved.id))||{},completed=groupCompletion(resolved.seedId,resolved.id);
   const data={...existing,year:v.year,week:v.week,plannedDate:v.plannedDate,leaderName:v.leaderName,ownerName:v.leaderName,theme:v.theme,themeName:v.theme,department:v.department,coLeaderName:v.coLeaderName,status:completed?'completed':(String(existing.status||'').toLowerCase()==='completed'?'completed':'planned'),updatedAt:serverTimestamp()};
-  if(resolved.seedId)data.sourceSeedId=resolved.seedId;
+  if(resolved.seedId)data.sourceSeedId=resolved.seedId;else delete data.sourceSeedId;
   if(completed){data.completedAt=Number(completed.completedAt||0);data.completedRoundId=completed.completedRoundId||existing.completedRoundId||'';}
   delete data.id;
-  await db.ref(`lor/plans/${resolved.id}`).set(data);
+  const updates={[`lor/plans/${resolved.id}`]:data};
+  const linkedRoundId=existing.completedRoundId||completed?.completedRoundId||'';
+  if(linkedRoundId){
+    updates[`lor/rounds/${linkedRoundId}/planWeek`]=v.week;
+    updates[`lor/rounds/${linkedRoundId}/planYear`]=v.year;
+    updates[`lor/rounds/${linkedRoundId}/sourceSeedId`]=resolved.seedId||'';
+    updates[`lor/rounds/${linkedRoundId}/updatedAt`]=serverTimestamp();
+  }
+  await db.ref().update(updates);
   if(v.coLeaderName)await rememberParticipant(v.coLeaderName).catch(()=>{});
   return {id:resolved.id,...data};
 }
@@ -236,7 +256,7 @@ async function afterRegister(form){
   if(!form.reportValidity())throw new Error('Fyll ut obligatoriske felt først.');
   const v=formValues(form);if(!v.completedDate)throw new Error('Velg faktisk gjennomført dato.');
   const completedAt=new Date(`${v.completedDate}T12:00:00`).getTime();if(!Number.isFinite(completedAt))throw new Error('Ugyldig dato.');
-  const resolved=await resolvePlan(form),roundId=db.ref('lor/rounds').push().key,user=window.firebase?.auth?.().currentUser,now=Date.now();
+  const resolved=await resolvePlan(form,v),roundId=db.ref('lor/rounds').push().key,user=window.firebase?.auth?.().currentUser,now=Date.now();
   const plan={year:v.year,week:v.week,plannedDate:v.plannedDate,leaderName:v.leaderName,ownerName:v.leaderName,theme:v.theme,themeName:v.theme,department:v.department,coLeaderName:v.coLeaderName,status:'completed',completedAt,completedRoundId:roundId,updatedAt:now};
   if(resolved.seedId)plan.sourceSeedId=resolved.seedId;
   const round={planId:resolved.id,sourceSeedId:resolved.seedId||'',planWeek:v.week,planYear:v.year,theme:v.theme,themeName:v.theme,department:v.department,leaderUid:user?.uid||'afterregistered',leaderName:v.leaderName,coLeaderName:v.coLeaderName,status:'Gjennomført',startedAt:completedAt,completedAt,updatedAt:now,registeredAfterwards:true,themeVersion:1,responses:{},employeeInterviews:{},summary:{note:'Etterregistrert fra årsplan',counts:{ok:0,improvement:0,deviation:0,followUp:0}}};
