@@ -220,6 +220,22 @@ function applyDashboardMeaning() {
   ensureStyles();
   const metrics = annualMetrics();
   const upcoming = personalUpcoming(metrics);
+  const counts = findingCounts();
+  const baseKpis = [...document.querySelectorAll('main.main .dashboard-kpis .kpi')]
+    .map(card => `${card.querySelector('strong')?.textContent || ''}|${card.querySelector('small')?.textContent || ''}`)
+    .join(';');
+  const signature = [
+    metrics.done,
+    metrics.overdue,
+    metrics.remaining,
+    upcoming.map(row => row.id).join(','),
+    counts.improvement,
+    counts.deviation,
+    baseKpis
+  ].join('::');
+  if (dash.dataset.dashboardMeaningSignature === signature) return;
+  dash.dataset.dashboardMeaningSignature = signature;
+
   syncKpis(dash);
   renderAnnualCard(dash, metrics);
   renderEmptyFindings(dash);
