@@ -7,6 +7,7 @@ async function loadAuthenticatedRuntimes() {
   runtimesLoaded = true;
 
   await import('./v35-runtime.js?v=3.8.15');
+  await import('./v35-plan-consistency.js?v=3.8.15');
   await import('./v366-functional-hotfix.js?v=3.8.15');
   await import('./v384-plan-engine.js?v=3.8.15');
   await import('./v371-runtime.js?v=3.8.15');
