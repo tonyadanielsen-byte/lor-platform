@@ -1,10 +1,10 @@
 {
-  "id": "/lor-platform/?app=lor-v3821",
+  "id": "/lor-platform/opex-lor",
   "name": "OpEx LOR – Lederoppfølgingsrunder",
   "short_name": "LOR",
   "description": "Digital lederoppfølging for Nortura Sarpsborg.",
   "lang": "nb-NO",
-  "start_url": "/lor-platform/?source=pwa&v=3821",
+  "start_url": "/lor-platform/?source=pwa&v=3822",
   "scope": "/lor-platform/",
   "display": "standalone",
   "orientation": "any",
