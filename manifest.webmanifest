@@ -13,16 +13,16 @@
   "theme_color": "#073A39",
   "icons": [
     {
-      "src": "./icons/lor-icon-192-v3826.png",
+      "src": "./icons/lor-icon-192-v3827.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any"
+      "purpose": "any maskable"
     },
     {
-      "src": "./icons/lor-icon-512-v3826.png",
+      "src": "./icons/lor-icon-512-v3827.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any"
+      "purpose": "any maskable"
     }
   ]
 }
