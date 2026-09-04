@@ -1,3 +1,7 @@
-# OpEx LOR
+# Lederoppfølgingsrunder – LOR
 
-Temporary marker avoided; no content changes intended.
+Digital løsning for lederoppfølgingsrunder (LOR) ved Nortura Sarpsborg.
+
+## Status
+
+Aktiv utvikling.
