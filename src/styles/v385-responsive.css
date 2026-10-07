@@ -1,0 +1,69 @@
+/* V3.8.31 – fluid desktop layout
+   Uses more of the available viewport on desktop/ultrawide screens without
+   changing the established tablet/mobile breakpoints or card design. */
+
+:root{
+  --lor-fluid-max:2100px;
+  --lor-fluid-gutter:clamp(16px,2vw,34px);
+}
+
+@media (min-width:1101px){
+  .topbar-inner,
+  .main{
+    width:min(var(--lor-fluid-max),calc(100vw - (var(--lor-fluid-gutter) * 2)));
+    max-width:none;
+  }
+
+  .main{
+    padding-left:0;
+    padding-right:0;
+  }
+
+  .v35-shell{
+    width:100%;
+    max-width:none;
+    margin-left:0;
+    margin-right:0;
+  }
+}
+
+/* Large desktop: allow the dashboard to breathe as the viewport grows. */
+@media (min-width:1500px){
+  .v35-shell{
+    padding:clamp(18px,1.15vw,26px);
+  }
+
+  .v35-kpis,
+  .v35-topgrid,
+  .v35-bottomgrid{
+    gap:clamp(12px,.8vw,18px);
+  }
+
+  .v370-plan-cards{
+    gap:clamp(9px,.65vw,14px);
+  }
+
+  .v35-kpi{
+    padding:clamp(15px,1vw,21px);
+  }
+
+  .v35-card,
+  .v35-next{
+    padding:clamp(15px,1vw,21px);
+  }
+}
+
+/* Ultrawide: preserve useful proportions rather than stretching one card excessively. */
+@media (min-width:1900px){
+  .v35-topgrid{
+    grid-template-columns:minmax(260px,1.05fr) minmax(420px,1.5fr) minmax(320px,1.15fr) minmax(360px,1.25fr);
+  }
+
+  .v35-bottomgrid{
+    grid-template-columns:minmax(0,1.4fr) minmax(420px,1fr);
+  }
+
+  .v35-kpi strong{
+    font-size:clamp(33px,1.8vw,40px);
+  }
+}
