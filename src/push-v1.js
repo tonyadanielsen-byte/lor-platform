@@ -1,7 +1,7 @@
 const VAPID_KEY = 'BGZHOWnnMHSGeBnC3pETHWRAu84UFL7yBZBq74Uxoc2xAfBPySP3XuTolheQHJqG_CxgZYNX6-hSZuA5XHDqJXc';
 const MESSAGING_SDK = 'https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js';
 const TOKEN_KEY = 'lor_fcm_token_v1';
-const BUILD = '3.7.6';
+const BUILD = '3.8.29';
 
 let messaging = null;
 let swRegistration = null;
@@ -45,7 +45,7 @@ function loadMessagingSdk() {
 async function registerWorker() {
   if (!('serviceWorker' in navigator)) throw new Error('Service Worker støttes ikke');
   if (swRegistration) return swRegistration;
-  swRegistration = await navigator.serviceWorker.register(`./sw.js?v=376`, { scope:'./' });
+  swRegistration = await navigator.serviceWorker.register(`./sw.js?v=3829`, { scope:'./' });
   await swRegistration.update().catch(() => {});
   return swRegistration;
 }
