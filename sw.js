@@ -1,10 +1,10 @@
-const CACHE_NAME = 'lor-shell-v3.8.27';
+const CACHE_NAME = 'lor-shell-v3.8.28';
 const APP_SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
-  './icons/lor-icon-192-v3827.png',
-  './icons/lor-icon-512-v3827.png'
+  './icons/lor-icon-192-v3828.png',
+  './icons/lor-icon-512-v3828.png'
 ];
 const LOR_SCOPE = self.registration.scope;
 
@@ -110,8 +110,8 @@ try {
     const link = data.link || LOR_SCOPE;
     return self.registration.showNotification(title, {
       body,
-      icon:'./icons/lor-icon-192-v3827.png',
-      badge:'./icons/lor-icon-192-v3827.png',
+      icon:'./icons/lor-icon-192-v3828.png',
+      badge:'./icons/lor-icon-192-v3828.png',
       tag:data.tag || 'lor-notification',
       renotify:false,
       data:{ link, planId:data.planId || '', eventType:data.eventType || '' }
